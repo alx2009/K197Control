@@ -41,7 +41,10 @@ void GeminiProtocol::update() {
                 if ( canBeInitiator && (outputBuffer.size()>0) ) {
                     isInitiator = true;
                     fast_write(HIGH);
-                    state = State::BIT_WRITE_START;
+                    delayMicroseconds(writeDelayMicros);
+                    bool bitToSend = outputBuffer.pop();
+                    fast_write(bitToSend);
+                    state = State::BIT_WRITE_WAIT_ACK;
                     DEBUG_STATE();
                     lastBitReadTime = currentTime;
                 }
@@ -53,38 +56,30 @@ void GeminiProtocol::update() {
 
                     if (outputBuffer.empty()) {
                         if (isInitiator) { // we need to stop here
-                            fast_write(LOW);           // Just to be sure...
-                            inputEdgeDetected = false; // just to be sure...
-                            isInitiator = false;       // just to be sure...
-                            state = State::IDLE;
+                            ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                                fast_write(LOW);           // Just to be sure...
+                                inputEdgeDetected = false; // just to be sure...
+                                isInitiator = false;       // just to be sure...
+                                state = State::IDLE;
+                            }
                         } else { // must send an acknowledge
                             fast_write(HIGH);           
-                            state = State::BIT_HANDSHAKE_START;
+                            delayMicroseconds(writeDelayMicros);
+                            fast_write(false);
+                            state = State::IDLE;
                         }
                     } else {  // if we have data to send, we cannot stop until we have sent it all...
                         fast_write(HIGH);
-                        state = State::BIT_WRITE_START;
+                        delayMicroseconds(writeDelayMicros);
+                        bool bitToSend = outputBuffer.pop();
+                        fast_write(bitToSend);
+                        state = State::BIT_WRITE_WAIT_ACK;  
                     }
                     DEBUG_STATE();
                     lastBitReadTime = currentTime;
                 }
                 break;
 
-            case State::BIT_WRITE_START:
-                if (currentTime - lastBitReadTime >= writeDelayMicros) {
-                    if (!outputBuffer.empty()) {
-                        bool bitToSend = outputBuffer.pop();
-                        fast_write(bitToSend);
-                        state = State::BIT_WRITE_WAIT_ACK;
-                    } else {
-                        Serial.println(F("Invalid state in BIT_WRITE_START"));
-                        fast_write(false);
-                        state = State::IDLE;
-                    }      
-                    DEBUG_STATE();
-                        break;
-                }
-                break;
             case State::BIT_WRITE_WAIT_ACK:
                 ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
                     if (inputEdgeDetected) {
@@ -105,14 +100,6 @@ void GeminiProtocol::update() {
                 }
                 break;
                 
-            case State::BIT_HANDSHAKE_START:
-                if (currentTime - lastBitReadTime >= writeDelayMicros) {
-                        fast_write(false);
-                        state = State::IDLE;
-                        DEBUG_STATE();
-                }
-                break;
-
             default:
                 break;
         }

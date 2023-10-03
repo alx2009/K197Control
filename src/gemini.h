@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-  @file     gemini_fifo.h
+  @file     gemini.h
 
   Arduino K197Control library
 
@@ -165,11 +165,8 @@ private:
     enum class State {
         IDLE=0,
         BIT_READ_START=1,
-        BIT_WRITE_START=2,
-        BIT_WRITE_WAIT_ACK=3,
-        BIT_WRITE_END=4,
-        BIT_HANDSHAKE_START=5,
-        // Add more states as needed
+        BIT_WRITE_WAIT_ACK=2,
+        BIT_WRITE_END=3,
     } state;
 
     boolFifo inputBuffer;
