@@ -65,7 +65,7 @@ public:
     void begin() {
         pinMode(outputPin, OUTPUT);
         state = State::IDLE;
-        lastBitReadTime = 0;
+        lastBitReadTime = 0L;
         attachInterrupt(digitalPinToInterrupt(inputPin), risingEdgeInterrupt, RISING);
     }
 
@@ -155,7 +155,6 @@ private:
     unsigned long readDelayMicros;
     unsigned long writeDelayMicros;
     unsigned long handshakeTimeoutMicros;
-    unsigned long lastBitReadTime;
     unsigned long readEndMicros;
     unsigned long writeEndMicros;
 
@@ -171,6 +170,13 @@ private:
 
     boolFifo inputBuffer;
     boolFifo outputBuffer;
+
+protected:
+    unsigned long lastBitReadTime;
+    unsigned long frameTimeout=50000L;
+    void setFrameTimeout(unsigned long newValue) {frameTimeout=newValue;};
+    unsigned long getFrameTimeout() const {return frameTimeout;};
+    bool frameEndDetected=true;
 };
 
 #endif //K197CTRL_GEMINI_H

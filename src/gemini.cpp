@@ -31,6 +31,7 @@ void GeminiProtocol::update() {
                 ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
                       if (inputEdgeDetected) {
                           isInitiator = false;
+                          frameEndDetected=false;
                           state = State::BIT_READ_START;
                           DEBUG_STATE();
                           lastBitReadTime = currentTime;
@@ -38,15 +39,20 @@ void GeminiProtocol::update() {
                           break;
                       }
                 }
-                if ( canBeInitiator && (outputBuffer.size()>0) ) {
-                    isInitiator = true;
-                    fast_write(HIGH);
-                    delayMicroseconds(writeDelayMicros);
-                    bool bitToSend = outputBuffer.pop();
-                    fast_write(bitToSend);
-                    state = State::BIT_WRITE_WAIT_ACK;
-                    DEBUG_STATE();
-                    lastBitReadTime = currentTime;
+                if (frameEndDetected) {
+                    if ( canBeInitiator && (outputBuffer.size()>0) ) {
+                        isInitiator = true;
+                        fast_write(HIGH);
+                        delayMicroseconds(writeDelayMicros);
+                        bool bitToSend = outputBuffer.pop();
+                        fast_write(bitToSend);
+                        frameEndDetected=false;
+                        state = State::BIT_WRITE_WAIT_ACK;
+                        DEBUG_STATE();
+                        lastBitReadTime = currentTime;
+                    }
+                } else if (currentTime - lastBitReadTime >= frameTimeout) {
+                    frameEndDetected = true;
                 }
                 break;
             case State::BIT_READ_START:
