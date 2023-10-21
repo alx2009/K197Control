@@ -31,6 +31,37 @@ public:
     }
 
 
+    struct K197mr_byte0 {
+        /*!
+           @brief measurement result frame byte 0
+        */
+        union {
+            uint8_t byte0; ///< allows access to all the flags in the
+                       ///< union as one byte as uint8_t
+            struct {
+                uint8_t range     : 3;   ///< measurement range
+                bool    relative  : 1;   ///< relative measurement when true
+                bool    undefined : 1;   ///< unknown use, normally set to 1
+                bool    ac_dc     : 1;   ///< true if AC
+                uint8_t unit      : 2;   ///< measurement unit
+            };
+        } __attribute__((packed)); ///<
+    }; ///< Structure designed to pack a number of flags into one byte
+
+
+struct K197measurement {
+    /*!
+       @brief control frame byte 0
+    */
+    union {
+      uint8_t frameBuffer[1]; ///< allows acccess to all the flags in the
+                              ///< union as one unsigned char
+      struct {
+          K197mr_byte0 byte0;     
+      };
+    } __attribute__((packed)); ///<
+  }; ///< Structure designed to pack a number of flags into one byte
+
 };
 
 #endif //K197CTRL_GEMINI_K197_CONTROL_H

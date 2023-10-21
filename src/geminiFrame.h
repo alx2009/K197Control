@@ -96,9 +96,13 @@ public:
     void handleFrameData() {
         if (frameComplete()) {
             while(hasData()) {
-                bool receivedBit = receive();
-                DEBUG_PRINT('-'); 
-                DEBUG_PRINT(receivedBit ? '1' : '0');
+#               ifdef DEBUG_GEMINI_FRAME
+                    bool receivedBit = receive();
+                    DEBUG_PRINT('-'); 
+                    DEBUG_PRINT(receivedBit ? '1' : '0');
+#               else 
+                    receive();
+#               endif //DEBUG_GEMINI_FRAME
             }
             return;          
         }
@@ -115,8 +119,11 @@ public:
                 }
             } else {
                 start_bit = receive();
-                if (start_bit) DEBUG_PRINT(F(" 1<"));
-                else DEBUG_PRINT(0);
+                if (start_bit) {
+                    DEBUG_PRINT(F(" 1<"));
+                } else {
+                    DEBUG_PRINT(0);
+                }
             }
         } else if (frameStarted()) {
             if ( checkFrameTimeout() ) {
