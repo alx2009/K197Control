@@ -19,6 +19,15 @@
 #ifndef K197CTRL_GEMINI_FRAME_H
 #define K197CTRL_GEMINI_FRAME_H
 #include "gemini.h"
+
+//#define DEBUG_GEMINI_FRAME  // comment/uncomment to activate debug prints
+#ifdef DEBUG_GEMINI_FRAME
+# define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+# define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+#else
+# define DEBUG_PRINT(...) 
+# define DEBUG_PRINTLN(...) 
+#endif //DEBUG_GEMINI_FRAME
     
 class GeminiFrame : public GeminiProtocol {   
 public:
@@ -58,8 +67,9 @@ public:
                     while(hasData() && frameEndDetected) receive();
                 }
                 if (!frameEndDetected) {
+                    resetFrame();
                     frameState = FrameState::WAIT_FRAME_DATA;
-                    Serial.println(); Serial.print('[');
+                    DEBUG_PRINTLN(); DEBUG_PRINT('[');
                 }
                 break;
 
@@ -69,7 +79,7 @@ public:
                 }
                 if ( frameEndDetected ) {
                     frameState = FrameState::FRAME_END;    
-                    Serial.print(']');
+                    DEBUG_PRINT(']');
                 }
                 break;
 
@@ -77,7 +87,7 @@ public:
                 while(hasData()) receive();
                 if ( frameEndDetected) {
                     frameState = FrameState::WAIT_FRAME_START;
-                    Serial.print('*'); Serial.println(); 
+                    DEBUG_PRINT('*'); DEBUG_PRINTLN(); 
                 }
                 break;
         }
@@ -87,8 +97,8 @@ public:
         if (frameComplete()) {
             while(hasData()) {
                 bool receivedBit = receive();
-                Serial.print('-'); 
-                Serial.print(receivedBit ? '1' : '0');
+                DEBUG_PRINT('-'); 
+                DEBUG_PRINT(receivedBit ? '1' : '0');
             }
             return;          
         }
@@ -96,20 +106,22 @@ public:
             if (start_bit) {
                 if (hasData(8)) {
                    pdata[byte_counter] = receiveByte(false);
-                   Serial.print(' '); Serial.print(pdata[byte_counter], BIN);
+                   DEBUG_PRINT(' '); DEBUG_PRINT(pdata[byte_counter], BIN);
                    byte_counter++;
+                   start_bit = false;
                    if (frameComplete()) {
-                       Serial.print('>');
+                       DEBUG_PRINT('>');
                    }
                 }
             } else {
                 start_bit = receive();
-                Serial.print(start_bit ? '1' : '0');
+                if (start_bit) DEBUG_PRINT(F(" 1<"));
+                else DEBUG_PRINT(0);
             }
         } else if (frameStarted()) {
             if ( checkFrameTimeout() ) {
                 frameTimeoutCounter++;
-                Serial.print('T');
+                DEBUG_PRINT('T');
                 resetFrame();
             }
         }
@@ -120,10 +132,10 @@ public:
     void resetFrame() {
         byte_counter=0;
         start_bit=false;
-        Serial.print('<');
+        DEBUG_PRINT('#');
     }
 
-    uint8_t *getFrame() { resetFrame(); return pdata;  };
+    uint8_t *getFrame() { DEBUG_PRINT('@'); resetFrame(); return pdata;  };
     uint8_t getFrameLenght() const { return pdata_len; };
 
 

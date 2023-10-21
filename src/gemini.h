@@ -176,7 +176,7 @@ protected:
     unsigned long frameTimeout=50000L;
     void setFrameTimeout(unsigned long newValue) {frameTimeout=newValue;};
     unsigned long getFrameTimeout() const {return frameTimeout;};
-    bool frameEndDetected=true;
+    bool volatile frameEndDetected=true;
 };
 
 #endif //K197CTRL_GEMINI_H
