@@ -39,7 +39,8 @@ public:
         Volt     = 0b00,
         Amp      = 0b10,
         Ohm      = 0b01,
-        reserved = 0b11,
+        dB       = 0b11,
+
     };
 
     struct K197mr_byte0 {
@@ -76,13 +77,39 @@ public:
         } __attribute__((packed)); ///<
     }; ///< Structure designed to pack a number of flags into one byte
 
-struct K197measurement {
+    enum K197range {
+        R0_Auto       = 0b000,
+        R1_200mV_Ohm  = 0b001,
+        R2_2V_KOhm    = 0b010,
+        R3_20V_KOhm   = 0b011,
+        R4_200V_KOhm  = 0b100,
+        R5_1KV_2MOhm  = 0b101,
+        R6_20MOhm     = 0b110,
+        R7_200MOhm    = 0b111,
+
+        // the following are just shorter aliases of the long names above
+        R0  = 0b000,
+        R1  = 0b001,
+        R2  = 0b010,
+        R3  = 0b011,
+        R4  = 0b100,
+        R5  = 0b101,
+        R6  = 0b110,
+        R7  = 0b111,
+    };
+
+    struct K197measurement {
+        static const size_t valueAsStringMinSize;
+        static const size_t resultAsStringMinSize;
+        static const size_t valueAsStringMinSizeEP;
+        static const size_t resultAsStringMinSizeEP;
+    
     /*!
-       @brief control frame byte 0
+       @brief measurement frame
     */
     union {
-      uint8_t frameBuffer[1]; ///< allows acccess to all the flags in the
-                              ///< union as one unsigned char
+      uint8_t frameBuffer[1]; ///< allows acccess to all the data as uint8_t array
+
       struct {
           K197mr_byte0 byte0;   
           K197mr_byte1 byte1;   
@@ -97,8 +124,163 @@ struct K197measurement {
       uint32_t uvalue;  ///< allows access to all bytes as a 32 bit unsigned integer value
     
     } __attribute__((packed)); ///<
+
+    inline bool isZero() const { return lsb.lo == 0 && lsb.hi == 0 && byte1.msb == 0 ? true : false; };
+    inline bool isAC() const {return byte0.ac_dc     ;};
+    inline bool isDC() const {return !byte0.ac_dc     ;};
+    inline bool isRelative() const {return byte0.relative;};
+    inline bool isAbsolute() const {return !byte0.relative;};
+
+    inline bool isVolt() const {return byte0.unit == K197unit::Volt ? true : false;};
+    inline bool isOhm() const {return byte0.unit == K197unit::Ohm ? true : false;};
+    inline bool isAmp() const {return byte0.unit == K197unit::Amp ? true : false;};
+    inline bool is_dB() const {return byte0.unit == K197unit::dB ? true : false;};
+    
+    inline bool isNegative() const {return byte1.negative;};
+    inline bool isOvrange() const {return byte1.ovrange;};
+
+    unsigned long getCount() const {return (((int32_t) byte1.msb)<<16) + (((int32_t) lsb.hi)<<8) + (((int32_t) lsb.lo));};
+
+    const char*getUnitString() const;
+
+    unsigned long getAbsValue() const;
+    long getValue() const;
+    int8_t getValueExponent() const;
+    double getValueAsDouble() const;
+    char *getValueAsString(char *buffer) const; 
+    char *getResultAsString(char *buffer) const;
+
+    unsigned long getAbsValueEP() const;
+    long getValueEP() const;
+    double getValueAsDoubleEP() const;
+    char *getValueAsStringEP(char *buffer) const; 
+    char *getResultAsStringEP(char *buffer) const;
+
+    
   }; ///< Structure designed to pack a number of flags into one byte
 
+
+    struct K197ct_byte0 {
+        /*!
+           @brief control frame byte 0
+        */
+        union {
+            uint8_t byte0; ///< allows access to all the flags in the
+                           ///< union as one byte as uint8_t
+            struct {
+                K197range   range : 3;   ///< measurement range 
+                bool    set_range : 1;   ///< when true ask to set the range
+                bool    relative  : 1;   ///< true = relative mode (false = absolute) 
+                bool    set_rel   : 1;   ///< when true ask to set the range
+                bool    dB        : 1;   ///< true = dB mode (false = Volt mode)
+                bool    set_db    : 1;   ///< when true ask to set dB or Volt
+            };
+        } __attribute__((packed)); ///<
+    }; ///< Structure designed to pack a number of flags into one byte
+
+    enum K197triggerMode {
+        invalid_000    = 0b000,
+        invalid_001    = 0b001,
+        T0_Cont_onTALK = 0b010,
+        T1_Once_onTALK = 0b011,
+        T2_Cont_onGET  = 0b010, // Alias of T0
+        T3_Once_onGET  = 0b011, // Alias of T1
+        invalid_101    = 0b101,
+        T4_Cont_onX    = 0b110,
+        T5_Once_onX    = 0b111,
+
+        // the following is used to trigger the measurement in modes T0-T3 
+        // note that in mode T4 and T5 any control frame will act as a trigger
+        T_TALK         = 0b100,
+        T_GET          = 0b100, // alias of T_TALK
+
+        // the following are just shorter aliases of the Tx_ long names above
+        T0 = 0b010,
+        T1 = 0b011,
+        T2 = 0b010, // Alias of T0
+        T3 = 0b011, // Alias of T1
+        T4 = 0b110,
+        T5 = 0b111,
+
+        // the following bitmaps can be or-ed together to define the required mode combination
+        T_Continuos_bm  = 0b000,
+        T_Once_bm       = 0b001,
+        T_TALK_bm    = 0b010,
+        T_GET_bm     = 0b010, // alias of T_on_TALK_bm
+        T_X_bm       = 0b100,
+    };
+
+    struct K197ct_byte1 {
+        /*!
+           @brief control frame byte 1
+        */
+        union {
+            uint8_t byte1; ///< allows access to all the flags in the
+                           ///< union as one byte as uint8_t
+            struct {
+                K197triggerMode   trigger : 3;   ///< trigger mode/status
+                bool    set_trigger: 1; ///< when true change trigger mode/status
+                bool    undefined4 : 1; ///< unknown use, normally set to 1
+                bool    ctrl_mode  : 1; ///< true = remote (false = local)
+                bool    undefined6 : 1; ///< unknown function
+                bool    set_ctrl_mode : 1; ///< when true ask to set ctrl_mode
+            };
+        } __attribute__((packed)); ///<
+    }; ///< Structure designed to pack a number of flags into one byte
+
+    struct K197ct_byte2 {
+        /*!
+           @brief control frame byte 2
+        */
+        union {
+            uint8_t byte2; ///< allows access to all the flags in the
+                           ///< union as one byte as uint8_t
+            struct {
+                bool    undefined0_4  : 5;   ///< unknown function
+                bool    sent_readings : 1; ///< true=send stored (false=send display)
+                bool    undefined6  : 1;   ///< unknown function
+                bool    set_sent_readings : 1; ///< when true ask to set sent_readings  
+            };
+        } __attribute__((packed)); ///<
+    }; ///< Structure designed to pack a number of flags into one byte
+
+    struct K197control {
+        static const size_t valueAsStringMinSize;
+        static const size_t resultAsStringMinSize;
+        static const size_t valueAsStringMinSizeEP;
+        static const size_t resultAsStringMinSizeEP;
+    
+        /*!
+            @brief control frame
+        */
+        union {
+            uint8_t frameBuffer[1]; ///< allows access to all the data as uint8_t array
+
+            struct {
+                K197ct_byte0 byte0;   
+                K197ct_byte1 byte1;
+                K197ct_byte1 byte2;
+                uint8_t byte3;
+                uint8_t byte4;   
+            };    
+        } __attribute__((packed)); ///<
+
+        void clear() {
+            for (unsigned int i=0; i<sizeof(K197control)/sizeof (uint8_t); i++) {
+                frameBuffer[i]=0x00;      
+            }
+        };
+
+        void setRange(K197range range);
+        void setRelative(bool isRelative=true);
+        void setAbsolute(bool isAbsolute=false);
+        void setDbMode(bool is_dB=true);
+        void setTriggerMode(K197triggerMode triggerMode);
+        void setLocalMode(bool isLocal=true);
+        void setRemoteMode(bool isRemote=true);
+        void setSendStoredReadings(bool sendStored=true);
+        void setSendDisplayReadings(bool sendDisplay=true);
+    };
 };
 
 #endif //K197CTRL_GEMINI_K197_CONTROL_H
