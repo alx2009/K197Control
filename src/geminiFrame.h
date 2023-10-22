@@ -52,10 +52,9 @@ public:
     }
 
     void sendFrame(uint8_t *pdata, uint8_t nbytes) {
-        while(nbytes>0) {
-            nbytes--;
+        for(uint8_t i=0; i<nbytes; i++) {
             send(true);
-            send(pdata[nbytes]);    
+            send(pdata[i]);    
         }
     }
     
