@@ -259,27 +259,29 @@ public:
             struct {
                 K197ct_byte0 byte0;   
                 K197ct_byte1 byte1;
-                K197ct_byte1 byte2;
+                K197ct_byte2 byte2;
                 uint8_t byte3;
                 uint8_t byte4;   
             };    
         } __attribute__((packed)); ///<
 
         void clear() {
-            for (unsigned int i=0; i<sizeof(K197control)/sizeof (uint8_t); i++) {
-                frameBuffer[i]=0x00;      
-            }
+            byte0.byte0 = 0x00;
+            byte1.byte1 = 0x00;
+            byte2.byte2 = 0x00;
+            byte3 = 0x00;
+            byte4 = 0x00;
         };
 
         void setRange(K197range range);
         void setRelative(bool isRelative=true);
-        void setAbsolute(bool isAbsolute=false);
+        void setAbsolute(bool isAbsolute=false) {setRelative(!isAbsolute);};
         void setDbMode(bool is_dB=true);
         void setTriggerMode(K197triggerMode triggerMode);
-        void setLocalMode(bool isLocal=true);
-        void setRemoteMode(bool isRemote=true);
+        void setRemoteMode(bool isRemote=true) ;
+        void setLocalMode(bool isLocal=true) {setRemoteMode(!isLocal);};
         void setSendStoredReadings(bool sendStored=true);
-        void setSendDisplayReadings(bool sendDisplay=true);
+        void setSendDisplayReadings(bool sendDisplay=true){setSendStoredReadings(!sendDisplay);};
     };
 };
 

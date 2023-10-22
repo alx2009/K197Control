@@ -15,6 +15,10 @@
 */
 #include "GeminiK197Control.h"
 
+/****************************************************************************
+***********          MEASUREMENT RESULT STRUCTURE                *************
+*****************************************************************************/
+
 const size_t GeminiK197Control::K197measurement::valueAsStringMinSize = 12;
 const size_t GeminiK197Control::K197measurement::resultAsStringMinSize = 16;
 const size_t GeminiK197Control::K197measurement::valueAsStringMinSizeEP = 14;
@@ -158,4 +162,38 @@ char *GeminiK197Control::K197measurement::getResultAsStringEP(char *buffer) cons
     tmpbuf[0]=0;
     
     return buffer;  
+}
+
+/*****************************************************************************
+******************             CONTROL STRUCTURE                  ************
+*****************************************************************************/
+
+void GeminiK197Control::K197control::setRange(K197range range) {
+    byte0.range = range;
+    byte0.set_range = true;
+}
+
+void GeminiK197Control::K197control::setRelative(bool isRelative) {
+    byte0.relative = isRelative;
+    byte0.set_rel = true;
+}
+
+void GeminiK197Control::K197control::setDbMode(bool is_dB) {
+    byte0.dB = is_dB;
+    byte0.set_db = true;
+}
+
+void GeminiK197Control::K197control::setTriggerMode(K197triggerMode triggerMode) {
+    byte1.trigger = triggerMode;
+    byte1.set_trigger = true;
+}
+
+void GeminiK197Control::K197control::setRemoteMode(bool isRemote) {
+  byte1.ctrl_mode = isRemote;
+  byte1.set_ctrl_mode = true;  
+}
+
+void GeminiK197Control::K197control::setSendStoredReadings(bool sendStored) {
+  byte2.sent_readings = sendStored;
+  byte2.set_sent_readings = true;  
 }
