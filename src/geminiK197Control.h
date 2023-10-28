@@ -108,7 +108,7 @@ public:
        @brief measurement frame
     */
     union {
-      uint8_t frameBuffer[1]; ///< allows acccess to all the data as uint8_t array
+      uint8_t frameBuffer[1]; ///< allows access to all the data as uint8_t array
 
       struct {
           K197mr_byte0 byte0;   
@@ -283,6 +283,52 @@ public:
         void setSendStoredReadings(bool sendStored=true);
         void setSendDisplayReadings(bool sendDisplay=true){setSendStoredReadings(!sendDisplay);};
     };
+
+  public:
+    bool begin();
+    bool begin(K197measurement *newInputBuffer, K197control *newOutputBuffer) {
+        setControlBuffer(newOutputBuffer, true);      
+        inputBuffer=newInputBuffer; 
+        return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
+    };
+    bool begin(K197measurement *newInputBuffer) {
+        setControlBuffer(NULL, false);      
+        inputBuffer=newInputBuffer; 
+        return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
+    };
+    K197measurement *getMeasurementBuffer() const {
+        return inputBuffer;
+    };
+    void setMeasurementBuffer(K197measurement *newInputBuffer, bool resetBuffer=false) {
+        inputBuffer=newInputBuffer;
+        setInputBuffer((uint8_t *) newInputBuffer, sizeof(K197measurement)/sizeof(uint8_t), resetBuffer);
+    };
+    K197control *getControlBuffer() const {
+        return outputBuffer;
+    };
+    void setControlBuffer(K197control *newOutputBuffer, bool resetBuffer=false) {
+        outputBuffer=newOutputBuffer;
+        if (resetBuffer) outputBuffer->clear();
+    };
+    bool sendImmediately(K197control *bufferToSend, bool resetAfterSending=true) {
+        if (bufferToSend == NULL) return false;
+        sendFrame((uint8_t *) bufferToSend, sizeof(K197control)/sizeof(uint8_t));      
+        if (resetAfterSending)  bufferToSend->clear();
+        return true;
+    };
+    bool sendImmediately(bool resetAfterSending=true) { return sendImmediately(outputBuffer, resetAfterSending);};
+    void execute() {  // TODO: implement execute
+      
+    };
+
+  private: 
+    K197measurement *inputBuffer=NULL;
+    K197control *outputBuffer=NULL;
+
+  protected:
+     using GeminiFrame::sendFrame;
+     using GeminiFrame::begin;
+    
 };
 
 #endif //K197CTRL_GEMINI_K197_CONTROL_H

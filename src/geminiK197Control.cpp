@@ -15,6 +15,13 @@
 */
 #include "GeminiK197Control.h"
 
+static GeminiK197Control::K197measurement defaultMeasurementResult;
+static GeminiK197Control::K197control defaultControlRequest;
+
+bool GeminiK197Control::begin() {
+    return begin(&defaultMeasurementResult, &defaultControlRequest);
+}
+
 /****************************************************************************
 ***********          MEASUREMENT RESULT STRUCTURE                *************
 *****************************************************************************/

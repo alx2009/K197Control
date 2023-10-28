@@ -43,9 +43,7 @@ public:
         if ( (nbytes == 0) || (pdata == NULL) ) {
             return false;
         }
-        this->pdata=pdata;
-        pdata_len=nbytes;
-        resetFrame();
+        setInputBuffer(pdata, nbytes);
         GeminiProtocol::begin();
         frameState=FrameState::WAIT_FRAME_START;
         return true;
@@ -92,6 +90,7 @@ public:
         }
     }    
 
+  private:
     void handleFrameData() {
         if (frameComplete()) {
             while(hasData()) {
@@ -133,6 +132,8 @@ public:
         }
     }
 
+  public:
+
     bool frameComplete() const { return byte_counter >= pdata_len ? true : false; }
     
     void resetFrame() {
@@ -148,6 +149,13 @@ public:
     bool frameTimeoutDetected() const {return frameTimeoutCounter>0 ? true : false;};
     unsigned long getFrameTimeoutCounter() const {return frameTimeoutCounter;};
     void resetFrameTimeoutCounter() { frameTimeoutCounter = 0L;};
+
+    protected:
+        void setInputBuffer(uint8_t *pdata, uint8_t nbytes, bool doResetFrame=false) {
+            this->pdata=pdata;
+            pdata_len=nbytes;
+            if (doResetFrame) resetFrame();
+        }
     
     private: 
         bool checkFrameTimeout() {return micros() - lastBitReadTime >= frameTimeout ? true : false;};
