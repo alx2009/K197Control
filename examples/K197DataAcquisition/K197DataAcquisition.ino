@@ -73,6 +73,7 @@ void rangeError(char command, char parameter) {
 }
 
 #define PREVENT_RANGE_ERROR(command, min, max, c) {\
+    Serial.print('<');Serial.print(c);Serial.print('>');                \
     if(!checkInput(min, max, c)) {  \
         rangeError(command, c);     \
         return;                     \
@@ -80,9 +81,9 @@ void rangeError(char command, char parameter) {
 }
 
 void setDecibel(char c) { PREVENT_RANGE_ERROR('D', '0', '1', c); Serial.print(F("Db=")); Serial.println(getInputValue(c));}
-void setRange(char c) {PREVENT_RANGE_ERROR('R', '0', '1', c); Serial.print(F("Range=")); Serial.println(getInputValue(c));}
+void setRange(char c) {PREVENT_RANGE_ERROR('R', '0', '5', c); Serial.print(F("Range=")); Serial.println(getInputValue(c));}
 void setRelative(char c) {PREVENT_RANGE_ERROR('Z', '0', '1', c); Serial.print(F("Relative=")); Serial.println(getInputValue(c));}
-void setTriggerMode(char c) {PREVENT_RANGE_ERROR('T', '0', '1', c); Serial.print(F("Trigger=")); Serial.println(getInputValue(c));}
+void setTriggerMode(char c) {PREVENT_RANGE_ERROR('T', '0', '5', c); Serial.print(F("Trigger=")); Serial.println(getInputValue(c));}
 void setReadings(char c) {PREVENT_RANGE_ERROR('B', '0', '1', c); Serial.print(F("Readings=")); Serial.println(getInputValue(c));}
 void executeCommand() {Serial.println(F("execute"));}
 
@@ -96,12 +97,16 @@ void executeCommand() {Serial.println(F("execute"));}
 */
 void handleSerial() { // Here we want to use Serial, rather than DebugOut
   char buf[INPUT_BUFFER_SIZE + 1];
-  size_t i = Serial.readBytesUntil('\n', buf, INPUT_BUFFER_SIZE);
-  buf[i] = 0;
-  if (i == 0) { // no characters read
+  size_t buflen = Serial.readBytesUntil('\n', buf, INPUT_BUFFER_SIZE);
+  buf[buflen] = 0;
+  if (buflen == 0) { // no characters read
+    Serial.println(F("buf empty!"));
     return;
   }
-  // Check help
+  for (uint8_t i=0; i<buflen; i++) {
+    if (buf[i] == '\r' || buf[i] == '\n') buf[i] = 0;
+  }
+  Serial.print(F("buf=")); Serial.println(buf);
   if (strcasecmp_P(buf, PSTR("++?")) == 0) {
     printHelp();
     return;
@@ -116,29 +121,32 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
       Serial.println(F("++loc"));
   } else if ((strcasecmp_P(buf, PSTR("++llc")) == 0)) {
       Serial.println(F("++llc"));
+  } else if (buf[0]=='+') {
+      Serial.print(F("Invalid: ")); Serial.println(buf);
   } else { // consider as a device dependent command string
       char *pbuf = buf;
-      while(pbuf[i] !=0) {
-          if (pbuf[i] == '\r' || pbuf[i] == '\n' || pbuf[i] == ' ') {
+      while(*pbuf !=0) {
+          Serial.print('[');Serial.print(*pbuf);Serial.print(']');
+          char cmd = *pbuf;
+          if ( cmd == ' ') {
               // ignore    
-          } else if (pbuf[i] == 'D' || pbuf[i] == 'd') {
-              setDecibel(++pbuf[i]);
-          } else if (pbuf[i] == 'R' || pbuf[i] == 'r') {
-              setRange(++pbuf[i]);
-          } else if (pbuf[i] == 'Z' || pbuf[i] == 'z') {
-              setRelative(++pbuf[i]);
-          } else if (pbuf[i] == 'T' || pbuf[i] == 't') {
-              setTriggerMode(++pbuf[i]);
-          } else if (pbuf[i] == 'B' || pbuf[i] == 'b') {
-              setReadings(++pbuf[i]);
-          } else if (pbuf[i] == 'X' || pbuf[i] == 'x') {
+          } else if (cmd == 'D' || cmd == 'd') {
+              setDecibel(*(++pbuf));
+          } else if (cmd == 'R' || cmd == 'r') {
+              setRange(*(++pbuf));
+          } else if (cmd == 'Z' || cmd == 'z') {
+              setRelative(*(++pbuf));
+          } else if (cmd == 'T' || cmd == 't') {
+              setTriggerMode(*(++pbuf));
+          } else if (cmd == 'B' || cmd == 'b') {
+              setReadings(*(++pbuf));
+          } else if (cmd == 'X' || cmd == 'x') {
               executeCommand();
           } else {
-              Serial.print(F("Invalid command: ")); Serial.println(pbuf[i]);
+              Serial.print(F("Invalid command: ")); Serial.println(*pbuf);
           }
           pbuf++;
       }
-    printError(buf);
   }
 }
 
