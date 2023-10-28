@@ -16,17 +16,25 @@
   This file is part of the Arduino K197control library, please see
   https://github.com/alx2009/K197Control for more information
 
-  Note: this file is excluded from gitHub. It is only used to compile the library!
+  This is an example data logger, sending any measurement result from the K197 to Serial.
+  We use an alternative method of using the K197Control library compared to other examples: 
+  Instead of using the class K197control, we interface using a GeminiFrame object, then we cast 
+  the received frame to GeminiK197Control::K197measurement
+
+  The methods defined in the class K197control  are not available, however since most of them 
+  are used to control the voltmeter they are not needed here, resulting in some RAM and flash size reduction.
 */
 
 #define INPUT_PIN 2      
 #define OUTPUT_PIN 3    
 
-GeminiK197Control gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170, 90);  // in, out, read pulse, write pulse, (not used), read delay, write delay
+GeminiFrame gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170, 90);  // in, out, read pulse, write pulse, (not used), read delay, write delay
 uint8_t inputFrame[4];
 
 void setup() {
-    Serial.begin(115200);
+    //if all alternative print statements are enabled, a higher baud rate may be needed
+    //Serial.begin(500000); 
+    Serial.begin(115200); 
 #ifdef DEBUG_PORT // Make sure the following pins match the definition inside gemini.h
     pinMode(A0, OUTPUT);
     pinMode(A1, OUTPUT);
