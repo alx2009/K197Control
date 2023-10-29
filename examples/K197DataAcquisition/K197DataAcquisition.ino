@@ -11,6 +11,12 @@
   This file is part of the Arduino K197control library, please see
   https://github.com/alx2009/K197Control for more information
 
+  This is an example application that can control the voltmener and acquire data.
+  We use the class K197Control to interface with the K197.
+  
+  Note that the application expects to receive an entire command line at a time. This is the case for example with the Arduino IDE built in Serial terminal.
+  If the Serial terminal send command character by character it may not work correctly.
+
 */
 #include <boolFifo.h>
 #include <gemini.h>
@@ -74,7 +80,6 @@ void rangeError(char command, char parameter) {
 }
 
 #define PREVENT_RANGE_ERROR(command, min, max, c) {\
-    Serial.print('<');Serial.print(c);Serial.print('>');                \
     if(!checkInput(min, max, c)) {  \
         rangeError(command, c);     \
         return;                     \
@@ -112,27 +117,21 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
   for (uint8_t i=0; i<buflen; i++) {
     if (buf[i] == '\r' || buf[i] == '\n') buf[i] = 0;
   }
-  Serial.print(F("buf=")); Serial.println(buf);
   if (strcasecmp_P(buf, PSTR("++?")) == 0) {
     printHelp();
     return;
   }
   if ((strcasecmp_P(buf, PSTR("++read")) == 0)) {
-      Serial.println(F("++read"));
       logOnce=true;
   } else if ((strcasecmp_P(buf, PSTR("++log")) == 0)) {
-      Serial.println(F("++log"));    
       logAlways=!logAlways;
   } else if ((strcasecmp_P(buf, PSTR("++trg")) == 0)) {
-      Serial.println(F("++trg"));
       gemini.getControlBuffer()->setTriggerMode(GeminiK197Control::K197triggerMode::T_TALK);
       executeCommand();
   } else if ((strcasecmp_P(buf, PSTR("++loc")) == 0)) {
-      Serial.println(F("++loc"));
       gemini.getControlBuffer()->setLocalMode();
       executeCommand();
   } else if ((strcasecmp_P(buf, PSTR("++llc")) == 0)) {
-      Serial.println(F("++llc"));
       gemini.getControlBuffer()->setRemoteMode();
       executeCommand();
   } else if (buf[0]=='+') {
@@ -140,7 +139,6 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
   } else { // consider as a device dependent command string
       char *pbuf = buf;
       while(*pbuf !=0) {
-          Serial.print('[');Serial.print(*pbuf);Serial.print(']');
           char cmd = *pbuf;
           if ( cmd == ' ') {
               // ignore    
