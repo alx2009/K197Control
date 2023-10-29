@@ -310,8 +310,9 @@ public:
         return true;
     };
     bool sendImmediately(bool resetAfterSending=true) { return sendImmediately(outputBuffer, resetAfterSending);};
-    void execute() {  // TODO: implement execute
-      
+    void execute() {
+        if (bufferToSend == NULL) return;
+        outputQueued=true;
     };
 
   private: 
@@ -321,6 +322,7 @@ public:
   protected:
      using GeminiFrame::sendFrame;
      using GeminiFrame::begin;
+     bool outputQueued=false;
     
 };
 

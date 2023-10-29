@@ -35,8 +35,9 @@
 #define DEBUG_PORT PORTC
 
 #ifdef DEBUG_PORT
-#    define DEBUG_STATE() DEBUG_PORT     = (DEBUG_PORT & 0xfc) | ( (uint8_t)state & 0x03)
-#    define DEBUG_FRAME_END() DEBUG_PORT = frameEndDetected ? (DEBUG_PORT & 0xfb) | 0x04 : DEBUG_PORT & 0xfb;
+#    define DEBUG_STATE()     DEBUG_PORT = (DEBUG_PORT & 0xfc) | ( ((uint8_t)state) & 0x03)
+//#    define DEBUG_STATE()     DEBUG_PORT = (DEBUG_PORT & 0xe7)   | ( (((uint8_t)state)<<3) & 0x18)
+#    define DEBUG_FRAME_END() DEBUG_PORT = frameEndDetected ? (DEBUG_PORT & 0xfb) | 0x04 : DEBUG_PORT & 0xfb
 #else
 #    define DEBUG_STATE()
 #    define DEBUG_FRAME_END()

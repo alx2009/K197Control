@@ -21,7 +21,7 @@
 #include "gemini.h"
 
 #ifdef DEBUG_PORT
-#    define DEBUG_FRAME_STATE() DEBUG_PORT = (DEBUG_PORT & 0xe7) | ( ((uint8_t)frameState<<3) & 0x18)
+#    define DEBUG_FRAME_STATE() DEBUG_PORT = (DEBUG_PORT & 0xe7) | ( (((uint8_t)frameState)<<3) & 0x18)
 #else
 #    define DEBUG_FRAME_STATE()
 #endif //DEBUG_PORT
