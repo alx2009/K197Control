@@ -19,6 +19,30 @@
 
 volatile bool inputEdgeDetected = false;
 
+bool GeminiProtocol::begin() {
+    if ( digitalPinToInterrupt(inputPin) == NOT_AN_INTERRUPT ) {
+        Serial.print(F("Error: Pin ")); Serial.print(inputPin); Serial.println(F(" does not support interrupts!"));
+        return false;
+    }
+    digitalWrite(outputPin, LOW);
+    pinMode(inputPin, INPUT);
+    pinMode(outputPin, OUTPUT);
+    digitalWrite(outputPin, LOW);
+    state = State::IDLE;
+#   ifdef DEBUG_PORT // Make sure the following pins match the definition of DEBUG_PORT above!
+        pinMode(A0, OUTPUT); // TODO: use direct port manipulation so the above is always verified...
+        pinMode(A1, OUTPUT);
+        pinMode(A2, OUTPUT);
+        pinMode(A3, OUTPUT);
+        pinMode(A4, OUTPUT);
+        pinMode(A5, OUTPUT);
+        DEBUG_STATE();
+#   endif //DEBUG_PORT
+    lastBitReadTime = 0L;
+    attachInterrupt(digitalPinToInterrupt(inputPin), risingEdgeInterrupt, RISING);
+    return true;
+}
+
 void risingEdgeInterrupt() {
     inputEdgeDetected = true;
 }

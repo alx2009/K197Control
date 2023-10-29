@@ -172,22 +172,11 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
 */
 void setup() {
     Serial.begin(115200); //Need a high baud rate or blocks for too long when printing to Serial 
-#ifdef DEBUG_PORT // Make sure the following pins match the definition inside gemini.h
-    pinMode(A0, OUTPUT);
-    pinMode(A1, OUTPUT);
-    pinMode(A2, OUTPUT);
-    pinMode(A3, OUTPUT);
-#endif //DEBUG_PORT
     delay(1000);
     Serial.println(F("K197DataAcquisition"));
     if (!gemini.begin()) {
         Serial.println(F("begin failed!"));
         while(true);
-    }
-    if ( digitalPinToInterrupt(INPUT_PIN) == NOT_AN_INTERRUPT ) {
-        Serial.print(F("Error: Pin ")); Serial.print(INPUT_PIN); Serial.println(F(" does not support interrupts!"));
-        Serial.println(F("Execution stopped"));
-        while(1);
     }
 
     // the following line is normally not needed 

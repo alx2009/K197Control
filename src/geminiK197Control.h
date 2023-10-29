@@ -286,16 +286,9 @@ public:
 
   public:
     bool begin();
-    bool begin(K197measurement *newInputBuffer, K197control *newOutputBuffer) {
-        setControlBuffer(newOutputBuffer, true);      
-        inputBuffer=newInputBuffer; 
-        return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
-    };
-    bool begin(K197measurement *newInputBuffer) {
-        setControlBuffer(NULL, false);      
-        inputBuffer=newInputBuffer; 
-        return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
-    };
+    bool begin(K197measurement *newInputBuffer);
+    bool begin(K197measurement *newInputBuffer, K197control *newOutputBuffer);
+
     K197measurement *getMeasurementBuffer() const {
         return inputBuffer;
     };

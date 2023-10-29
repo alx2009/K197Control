@@ -55,19 +55,9 @@ public:
         uint8_t outputPort = digitalPinToPort(outputPin);
         inputRegister=portInputRegister(inputPort);
         outputRegister=portOutputRegister(outputPort);
-
-        digitalWrite(outputPin, LOW);
-        pinMode(inputPin, INPUT);
-        pinMode(outputPin, OUTPUT);
-        digitalWrite(outputPin, LOW);
     }
 
-    void begin() {
-        pinMode(outputPin, OUTPUT);
-        state = State::IDLE;
-        lastBitReadTime = 0L;
-        attachInterrupt(digitalPinToInterrupt(inputPin), risingEdgeInterrupt, RISING);
-    }
+    bool begin();
 
     void update();
 

@@ -44,9 +44,8 @@ public:
             return false;
         }
         setInputBuffer(pdata, nbytes);
-        GeminiProtocol::begin();
         frameState=FrameState::WAIT_FRAME_START;
-        return true;
+        return GeminiProtocol::begin();
     }
 
     void sendFrame(uint8_t *pdata, uint8_t nbytes) {

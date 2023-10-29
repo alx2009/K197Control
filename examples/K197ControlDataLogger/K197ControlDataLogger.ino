@@ -34,12 +34,6 @@ void setup() {
     //if all alternative print statements are enabled, a higher baud rate may be needed
     //Serial.begin(500000); 
     Serial.begin(115200); 
-#ifdef DEBUG_PORT // Make sure the following pins match the definition inside gemini.h
-    pinMode(A0, OUTPUT);
-    pinMode(A1, OUTPUT);
-    pinMode(A2, OUTPUT);
-    pinMode(A3, OUTPUT);
-#endif //DEBUG_PORT
     delay(1000);
     Serial.println(F("K197ControlDataLogger"));
     if (!gemini.begin(inputFrame, sizeof(inputFrame)/sizeof(inputFrame[0]))) {

@@ -22,6 +22,18 @@ bool GeminiK197Control::begin() {
     return begin(&defaultMeasurementResult, &defaultControlRequest);
 }
 
+bool GeminiK197Control::begin(K197measurement *newInputBuffer) {
+    setControlBuffer(NULL, false);      
+    inputBuffer=newInputBuffer; 
+    return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
+}
+
+bool GeminiK197Control::begin(K197measurement *newInputBuffer, K197control *newOutputBuffer) {
+    setControlBuffer(newOutputBuffer, true);      
+    inputBuffer=newInputBuffer; 
+    return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
+}
+
 /****************************************************************************
 ***********          MEASUREMENT RESULT STRUCTURE                *************
 *****************************************************************************/
