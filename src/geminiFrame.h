@@ -52,7 +52,11 @@ public:
         if (!GeminiProtocol::begin()) return false;
         setInputBuffer(pdata, nbytes);
         frameState=FrameState::WAIT_FRAME_START;
+#   ifdef DEBUG_PORT // Make sure the following pins match the definition of DEBUG_PORT above!
+        pinMode(A3, OUTPUT); // TODO: use direct port manipulation so the above is always verified...
+        pinMode(A4, OUTPUT);
         DEBUG_FRAME_STATE();
+#   endif //DEBUG_PORT
         return true;
     }
 

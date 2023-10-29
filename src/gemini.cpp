@@ -33,9 +33,6 @@ bool GeminiProtocol::begin() {
         pinMode(A0, OUTPUT); // TODO: use direct port manipulation so the above is always verified...
         pinMode(A1, OUTPUT);
         pinMode(A2, OUTPUT);
-        pinMode(A3, OUTPUT);
-        pinMode(A4, OUTPUT);
-        pinMode(A5, OUTPUT);
         DEBUG_STATE();
         DEBUG_FRAME_END();
 #   endif //DEBUG_PORT
