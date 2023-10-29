@@ -21,7 +21,7 @@
   Instead of using the class K197control, we interface using a GeminiFrame object, then we cast 
   the received frame to GeminiK197Control::K197measurement
 
-  The methods defined in the class K197control  are not available, however since most of them 
+  Note that in this way the methods defined in the class K197control  are not available, however since most of them 
   are used to control the voltmeter they are not needed here, resulting in some RAM and flash size reduction.
 */
 
