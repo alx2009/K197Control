@@ -37,6 +37,7 @@ bool GeminiProtocol::begin() {
         pinMode(A4, OUTPUT);
         pinMode(A5, OUTPUT);
         DEBUG_STATE();
+        DEBUG_FRAME_END();
 #   endif //DEBUG_PORT
     lastBitReadTime = 0L;
     attachInterrupt(digitalPinToInterrupt(inputPin), risingEdgeInterrupt, RISING);
@@ -58,6 +59,7 @@ void GeminiProtocol::update() {
                           frameEndDetected=false;
                           state = State::BIT_READ_START;
                           DEBUG_STATE();
+                          DEBUG_FRAME_END();
                           lastBitReadTime = currentTime;
                           inputEdgeDetected = false; // Reset the flag atomically
                           break;
@@ -73,10 +75,12 @@ void GeminiProtocol::update() {
                         frameEndDetected=false;
                         state = State::BIT_WRITE_WAIT_ACK;
                         DEBUG_STATE();
+                        DEBUG_FRAME_END();
                         lastBitReadTime = currentTime;
                     }
                 } else if (currentTime - lastBitReadTime >= frameTimeout) {
                     frameEndDetected = true;
+                    DEBUG_FRAME_END();
                 }
                 break;
             case State::BIT_READ_START:

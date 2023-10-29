@@ -20,6 +20,12 @@
 #define K197CTRL_GEMINI_FRAME_H
 #include "gemini.h"
 
+#ifdef DEBUG_PORT
+#    define DEBUG_FRAME_STATE() DEBUG_PORT = (DEBUG_PORT & 0xe7) | ( ((uint8_t)frameState<<3) & 0x18)
+#else
+#    define DEBUG_FRAME_STATE()
+#endif //DEBUG_PORT
+
 //#define DEBUG_GEMINI_FRAME  // comment/uncomment to activate debug prints
 #ifdef DEBUG_GEMINI_FRAME
 # define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
@@ -43,9 +49,11 @@ public:
         if ( (nbytes == 0) || (pdata == NULL) ) {
             return false;
         }
+        if (!GeminiProtocol::begin()) return false;
         setInputBuffer(pdata, nbytes);
         frameState=FrameState::WAIT_FRAME_START;
-        return GeminiProtocol::begin();
+        DEBUG_FRAME_STATE();
+        return true;
     }
 
     void sendFrame(uint8_t *pdata, uint8_t nbytes) {
@@ -65,6 +73,7 @@ public:
                 if (!frameEndDetected) {
                     resetFrame();
                     frameState = FrameState::WAIT_FRAME_DATA;
+                    DEBUG_FRAME_STATE();
                     DEBUG_PRINTLN(); DEBUG_PRINT('[');
                 }
                 break;
@@ -75,6 +84,7 @@ public:
                 }
                 if ( frameEndDetected ) {
                     frameState = FrameState::FRAME_END;    
+                    DEBUG_FRAME_STATE();
                     DEBUG_PRINT(']');
                 }
                 break;
@@ -83,6 +93,7 @@ public:
                 while(hasData()) receive();
                 if ( frameEndDetected) {
                     frameState = FrameState::WAIT_FRAME_START;
+                    DEBUG_FRAME_STATE();
                     DEBUG_PRINT('*'); DEBUG_PRINTLN(); 
                 }
                 break;
