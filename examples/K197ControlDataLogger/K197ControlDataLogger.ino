@@ -40,11 +40,6 @@ void setup() {
         Serial.println(F("begin failed!"));
         while(true);
     }
-    if ( digitalPinToInterrupt(INPUT_PIN) == NOT_AN_INTERRUPT ) {
-        Serial.print(F("Error: Pin ")); Serial.print(INPUT_PIN); Serial.println(F(" does not support interrupts!"));
-        Serial.println(F("Execution stopped"));
-        while(1);
-    }
 
     // the following line is normally not needed 
     //gemini.serverStartup(2000000);
