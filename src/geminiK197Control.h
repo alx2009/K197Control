@@ -290,8 +290,10 @@ public:
     bool begin(K197measurement *newInputBuffer, K197control *newOutputBuffer);
 
     void update() {
-        if (outputQueued && noOutputPending())
+        if (outputQueued && noOutputPending()) {
             sendImmediately(); 
+            outputQueued = false;
+        }
         GeminiFrame::update();
     }
 
