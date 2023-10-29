@@ -96,7 +96,7 @@ void setTriggerMode(char c) {PREVENT_RANGE_ERROR('T', '0', '5', c); Serial.print
        gemini.getControlBuffer()->setTriggerMode((GeminiK197Control::K197triggerMode) getInputValue(c)); }
 void setReadings(char c) {PREVENT_RANGE_ERROR('B', '0', '1', c); Serial.print(F("Readings=")); Serial.println(getInputValue(c)); 
        gemini.getControlBuffer()->setSendStoredReadings(getInputValue(c)); }
-void executeCommand() {Serial.println(F("execute")); gemini.sendImmediately(); }
+void executeCommand() {Serial.println(F("execute")); gemini.execute(); }
 
 /*!
       @brief handle all Serial commands

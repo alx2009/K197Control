@@ -289,6 +289,13 @@ public:
     bool begin(K197measurement *newInputBuffer);
     bool begin(K197measurement *newInputBuffer, K197control *newOutputBuffer);
 
+    void update() {
+        if (outputQueued && noOutputPending())
+            sendImmediately(); 
+        GeminiFrame::update();
+    }
+
+
     K197measurement *getMeasurementBuffer() const {
         return inputBuffer;
     };
@@ -296,22 +303,29 @@ public:
         inputBuffer=newInputBuffer;
         setInputBuffer((uint8_t *) newInputBuffer, sizeof(K197measurement)/sizeof(uint8_t), resetBuffer);
     };
+    
     K197control *getControlBuffer() const {
         return outputBuffer;
     };
     void setControlBuffer(K197control *newOutputBuffer, bool resetBuffer=false) {
         outputBuffer=newOutputBuffer;
         if (resetBuffer) outputBuffer->clear();
+        outputQueued = false;
     };
+    
     bool sendImmediately(K197control *bufferToSend, bool resetAfterSending=true) {
         if (bufferToSend == NULL) return false;
         sendFrame((uint8_t *) bufferToSend, sizeof(K197control)/sizeof(uint8_t));      
         if (resetAfterSending)  bufferToSend->clear();
         return true;
     };
-    bool sendImmediately(bool resetAfterSending=true) { return sendImmediately(outputBuffer, resetAfterSending);};
+    bool sendImmediately(bool resetAfterSending=true) { 
+        return sendImmediately(outputBuffer, resetAfterSending); 
+        outputQueued=false;
+    };
+    
     void execute() {
-        if (bufferToSend == NULL) return;
+        if (outputBuffer == NULL) return;
         outputQueued=true;
     };
 

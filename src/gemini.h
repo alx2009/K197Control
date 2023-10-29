@@ -170,6 +170,8 @@ protected:
     void setFrameTimeout(unsigned long newValue) {frameTimeout=newValue;};
     unsigned long getFrameTimeout() const {return frameTimeout;};
     bool volatile frameEndDetected=true;
+    bool isOutputPending() {return !outputBuffer.empty();};
+    bool noOutputPending() {return outputBuffer.empty();};
 };
 
 #endif //K197CTRL_GEMINI_H
