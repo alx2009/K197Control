@@ -22,6 +22,8 @@
 #define OUTPUT_PIN 3    
 
 GeminiK197Control gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170, 90);  // in, out, read pulse, write pulse, (not used), read delay, write delay
+bool logOnce=false;
+bool logAlways=true;
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Management of the serial user interface
@@ -48,7 +50,7 @@ void printHelp() { // ++ commands similar to Prologix GPIB-USB controller, devic
   Serial.println(F("   ++llc  > remote mode"));
   Serial.println(F("   or device dependent command(s):"));
   Serial.println(F("   D0/1 > DB off/on, R0-6 > set range 0-6, Z0/1 > set relative off/on, T0-5 Set trigger mode 0/5"));
-  Serial.println(F("   B0/1 > send display/stored reading, X > execute command"));
+  Serial.println(F("   B0/1 > send display/stored reading, X > execute command (ONLY allowed as last character)"));
   
   printPrompt();
 }
@@ -80,12 +82,17 @@ void rangeError(char command, char parameter) {
     }                               \
 }
 
-void setDecibel(char c) { PREVENT_RANGE_ERROR('D', '0', '1', c); Serial.print(F("Db=")); Serial.println(getInputValue(c));}
-void setRange(char c) {PREVENT_RANGE_ERROR('R', '0', '5', c); Serial.print(F("Range=")); Serial.println(getInputValue(c));}
-void setRelative(char c) {PREVENT_RANGE_ERROR('Z', '0', '1', c); Serial.print(F("Relative=")); Serial.println(getInputValue(c));}
-void setTriggerMode(char c) {PREVENT_RANGE_ERROR('T', '0', '5', c); Serial.print(F("Trigger=")); Serial.println(getInputValue(c));}
-void setReadings(char c) {PREVENT_RANGE_ERROR('B', '0', '1', c); Serial.print(F("Readings=")); Serial.println(getInputValue(c));}
-void executeCommand() {Serial.println(F("execute"));}
+void setDecibel(char c) { PREVENT_RANGE_ERROR('D', '0', '1', c); Serial.print(F("Db=")); Serial.println(getInputValue(c)); 
+       gemini.getControlBuffer()->setDbMode(getInputValue(c));}
+void setRange(char c) {PREVENT_RANGE_ERROR('R', '0', '5', c); Serial.print(F("Range=")); Serial.println(getInputValue(c));
+       gemini.getControlBuffer()->setRange((GeminiK197Control::K197range) getInputValue(c));}
+void setRelative(char c) {PREVENT_RANGE_ERROR('Z', '0', '1', c); Serial.print(F("Relative=")); Serial.println(getInputValue(c)); 
+       gemini.getControlBuffer()->setRelative(getInputValue(c)); }
+void setTriggerMode(char c) {PREVENT_RANGE_ERROR('T', '0', '5', c); Serial.print(F("Trigger=")); Serial.println(getInputValue(c)); 
+       gemini.getControlBuffer()->setTriggerMode((GeminiK197Control::K197triggerMode) getInputValue(c)); }
+void setReadings(char c) {PREVENT_RANGE_ERROR('B', '0', '1', c); Serial.print(F("Readings=")); Serial.println(getInputValue(c)); 
+       gemini.getControlBuffer()->setSendStoredReadings(getInputValue(c)); }
+void executeCommand() {Serial.println(F("execute")); gemini.sendImmediately(); }
 
 /*!
       @brief handle all Serial commands
@@ -113,14 +120,22 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
   }
   if ((strcasecmp_P(buf, PSTR("++read")) == 0)) {
       Serial.println(F("++read"));
+      logOnce=true;
   } else if ((strcasecmp_P(buf, PSTR("++log")) == 0)) {
       Serial.println(F("++log"));    
+      logAlways=!logAlways;
   } else if ((strcasecmp_P(buf, PSTR("++trg")) == 0)) {
       Serial.println(F("++trg"));
+      gemini.getControlBuffer()->setTriggerMode(GeminiK197Control::K197triggerMode::T_TALK);
+      executeCommand();
   } else if ((strcasecmp_P(buf, PSTR("++loc")) == 0)) {
       Serial.println(F("++loc"));
+      gemini.getControlBuffer()->setLocalMode();
+      executeCommand();
   } else if ((strcasecmp_P(buf, PSTR("++llc")) == 0)) {
       Serial.println(F("++llc"));
+      gemini.getControlBuffer()->setRemoteMode();
+      executeCommand();
   } else if (buf[0]=='+') {
       Serial.print(F("Invalid: ")); Serial.println(buf);
   } else { // consider as a device dependent command string
@@ -141,7 +156,8 @@ void handleSerial() { // Here we want to use Serial, rather than DebugOut
           } else if (cmd == 'B' || cmd == 'b') {
               setReadings(*(++pbuf));
           } else if (cmd == 'X' || cmd == 'x') {
-              executeCommand();
+              if (pbuf[1] == 0) executeCommand();
+              else Serial.println(F("Intermediate X ignored"));
           } else {
               Serial.print(F("Invalid command: ")); Serial.println(*pbuf);
           }
@@ -191,36 +207,32 @@ void loop() {
     }
     gemini.update();
     if ( gemini.frameComplete() ) {
-        uint8_t *pframe = gemini.getFrame();
+        gemini.resetFrame(); // Must call resetFrame() or getFrame as soon as possible after frameComplete returns true...
+        if (logOnce || logAlways) {
+            logOnce = false;
+            GeminiK197Control::K197measurement *pmeasurement = gemini.getMeasurementBuffer();
 
-        // Uncomment to print the received frame buffer
-        //uint8_t frame_len=gemini.getFrameLenght();
-        //for (int i=0; i<frame_len; i++) {
-        //   Serial.print(pframe[i], BIN); Serial.print(' ');   
-        //}
+            // Uncomment one or more of the following statements for alternative ways to print the data or for troubleshooting 
+            //Serial.print(F(" B0=")); Serial.print(pmeasurement->byte0.byte0, BIN);
+            //Serial.print(F(": unit=")); Serial.print(pmeasurement->byte0.unit);
+            //Serial.print(F(": AC/DC=")); Serial.print(pmeasurement->byte0.ac_dc);
+            //Serial.print(F(", undef0=")); Serial.print(pmeasurement->byte0.undefined);
+            //Serial.print(F(", rel=")); Serial.print(pmeasurement->byte0.relative);
+            //Serial.print(F(", range=")); Serial.print(pmeasurement->byte0.range);
+            //Serial.print(F(", OV=")); Serial.print(pmeasurement->byte1.ovrange);
+            //Serial.print(F(", undef1=")); Serial.print(pmeasurement->byte1.undefined);
+            //Serial.print(F(", neg=")); Serial.print(pmeasurement->byte1.negative); */
+            //Serial.print(F(" - getCount()=")); Serial.println(pmeasurement->getCount());
+            //Serial.print(F("getAbsValue()=")); Serial.print(pmeasurement->getAbsValue());
+            //Serial.print(F(", getValue()=")); Serial.print(pmeasurement->getValue());
+            //Serial.print(F(", getValueAsDouble()=")); Serial.print(pmeasurement->getValueAsDouble(), 9);
 
-        GeminiK197Control::K197measurement *pmeasurement = (GeminiK197Control::K197measurement*) pframe;
+            char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
+            Serial.println(pmeasurement->getResultAsString(buffer));
 
-        // Uncomment one or more of the following statements for alternative ways to print the data or for troubleshooting 
-        //Serial.print(F(" B0=")); Serial.print(pmeasurement->byte0.byte0, BIN);
-        //Serial.print(F(": unit=")); Serial.print(pmeasurement->byte0.unit);
-        //Serial.print(F(": AC/DC=")); Serial.print(pmeasurement->byte0.ac_dc);
-        //Serial.print(F(", undef0=")); Serial.print(pmeasurement->byte0.undefined);
-        //Serial.print(F(", rel=")); Serial.print(pmeasurement->byte0.relative);
-        //Serial.print(F(", range=")); Serial.print(pmeasurement->byte0.range);
-        //Serial.print(F(", OV=")); Serial.print(pmeasurement->byte1.ovrange);
-        //Serial.print(F(", undef1=")); Serial.print(pmeasurement->byte1.undefined);
-        //Serial.print(F(", neg=")); Serial.print(pmeasurement->byte1.negative); */
-        //Serial.print(F(" - getCount()=")); Serial.println(pmeasurement->getCount());
-        //Serial.print(F("getAbsValue()=")); Serial.print(pmeasurement->getAbsValue());
-        //Serial.print(F(", getValue()=")); Serial.print(pmeasurement->getValue());
-        //Serial.print(F(", getValueAsDouble()=")); Serial.print(pmeasurement->getValueAsDouble(), 9);
-
-        char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
-        Serial.println(pmeasurement->getResultAsString(buffer));
-
-        //For enhanced precision replace the above statemept with the following:
-        //Serial.println(pmeasurement->getResultAsStringEP(buffer));
+            //For enhanced precision replace the above statemept with the following:
+            //Serial.println(pmeasurement->getResultAsStringEP(buffer));
+        }
 
     }
     if (gemini.frameTimeoutDetected()) {
