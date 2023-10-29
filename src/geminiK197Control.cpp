@@ -50,12 +50,12 @@ int8_t GeminiK197Control::K197measurement::getValueExponent() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//       Standard precision functions
+//       Standard resolution functions
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 unsigned long GeminiK197Control::K197measurement::getAbsValue() const { 
     uint64_t uuvalue = getCount();
-    uuvalue = uuvalue * 3125;  // multiply first to avoid losing precision. This is why we need a 64 bit integer...
+    uuvalue = uuvalue * 3125;  // multiply first to avoid losing accuracy. This is why we need a 64 bit integer...
     uuvalue = uuvalue / 16384;
     return uuvalue;
 }
@@ -111,27 +111,27 @@ char * GeminiK197Control::K197measurement::getResultAsString(char *buffer) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//       Extended precision functions
+//       Extended resolution functions
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned long GeminiK197Control::K197measurement::getAbsValueEP() const {
+unsigned long GeminiK197Control::K197measurement::getAbsValueER() const {
     uint64_t uuvalue = getCount();
-    uuvalue = uuvalue * 78125;  // multiply first to avoid losing precision. This is why we need a 64 bit integer...
+    uuvalue = uuvalue * 78125;  // multiply first to avoid losing accuracy. This is why we need a 64 bit integer...
     uuvalue = uuvalue / 4096;
     return uuvalue;
 }
 
-long GeminiK197Control::K197measurement::getValueEP() const {
-    return byte1.negative ? -getAbsValueEP() : getAbsValueEP();
+long GeminiK197Control::K197measurement::getValueER() const {
+    return byte1.negative ? -getAbsValueER() : getAbsValueER();
 }
 
-double GeminiK197Control::K197measurement::getValueAsDoubleEP() const {
-    return double(getValueEP()) * range_power[range_baseline[byte0.unit]+ byte0.range] * 0.01;  
+double GeminiK197Control::K197measurement::getValueAsDoubleER() const {
+    return double(getValueER()) * range_power[range_baseline[byte0.unit]+ byte0.range] * 0.01;  
 }
 
-char *GeminiK197Control::K197measurement::getValueAsStringEP(char *buffer) const {
+char *GeminiK197Control::K197measurement::getValueAsStringER(char *buffer) const {
     char *tmpbuf = buffer;
-    uint32_t uvalue = getAbsValueEP();
+    uint32_t uvalue = getAbsValueER();
     tmpbuf[0] = isNegative() ? '-' : '+';
     tmpbuf++;
     uint32_t digit8 = uvalue / 10000000UL;
@@ -151,13 +151,13 @@ char *GeminiK197Control::K197measurement::getValueAsStringEP(char *buffer) const
     return buffer;  
 }
  
-char *GeminiK197Control::K197measurement::getResultAsStringEP(char *buffer) const {
+char *GeminiK197Control::K197measurement::getResultAsStringER(char *buffer) const {
     char *tmpbuf = buffer;
     tmpbuf[0] = byte1.ovrange ? 'O' : isZero() ? 'Z' : 'N';
     tmpbuf++;
     strcpy(tmpbuf, getUnitString()); 
     tmpbuf+=3;
-    getValueAsStringEP(tmpbuf);
+    getValueAsStringER(tmpbuf);
     tmpbuf+=10;
     tmpbuf[0] = 'E';
     tmpbuf++;

@@ -150,11 +150,11 @@ public:
     char *getValueAsString(char *buffer) const; 
     char *getResultAsString(char *buffer) const;
 
-    unsigned long getAbsValueEP() const;
-    long getValueEP() const;
-    double getValueAsDoubleEP() const;
-    char *getValueAsStringEP(char *buffer) const; 
-    char *getResultAsStringEP(char *buffer) const;
+    unsigned long getAbsValueER() const;
+    long getValueER() const;
+    double getValueAsDoubleER() const;
+    char *getValueAsStringER(char *buffer) const; 
+    char *getResultAsStringER(char *buffer) const;
 
     
   }; ///< Structure designed to pack a number of flags into one byte

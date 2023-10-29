@@ -1,8 +1,3 @@
-#include <boolFifo.h>
-#include <gemini.h>
-#include <geminiFrame.h>
-#include <geminiK197Control.h>
-
 /**************************************************************************/
 /*!
   @file     K197DataAcquisition.ino
@@ -17,6 +12,10 @@
   https://github.com/alx2009/K197Control for more information
 
 */
+#include <boolFifo.h>
+#include <gemini.h>
+#include <geminiFrame.h>
+#include <geminiK197Control.h>
 
 #define INPUT_PIN 2      
 #define OUTPUT_PIN 3    
@@ -230,8 +229,8 @@ void loop() {
             char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
             Serial.println(pmeasurement->getResultAsString(buffer));
 
-            //For enhanced precision replace the above statemept with the following:
-            //Serial.println(pmeasurement->getResultAsStringEP(buffer));
+            //For enhanced resolution replace the above statement with the following:
+            //Serial.println(pmeasurement->getResultAsStringER(buffer));
         }
 
     }

@@ -1,8 +1,3 @@
-#include <boolFifo.h>
-#include <gemini.h>
-#include <geminiFrame.h>
-#include <geminiK197Control.h>
-
 /**************************************************************************/
 /*!
   @file     src.ino
@@ -24,6 +19,10 @@
   Note that in this way the methods defined in the class K197control  are not available, however since most of them 
   are used to control the voltmeter they are not needed here, resulting in some RAM and flash size reduction.
 */
+#include <boolFifo.h>
+#include <gemini.h>
+#include <geminiFrame.h>
+#include <geminiK197Control.h>
 
 #define INPUT_PIN 2      
 #define OUTPUT_PIN 3    
@@ -92,8 +91,8 @@ void loop() {
         char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
         Serial.println(pmeasurement->getResultAsString(buffer));
 
-        //For enhanced precision replace the above statemept with the following:
-        //Serial.println(pmeasurement->getResultAsStringEP(buffer));
+        //For enhanced resolution replace the above statemept with the following:
+        //Serial.println(pmeasurement->getResultAsStringER(buffer));
 
     }
     if (gemini.frameTimeoutDetected()) {
