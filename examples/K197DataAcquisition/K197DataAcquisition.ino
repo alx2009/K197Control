@@ -106,7 +106,7 @@ void executeCommand() {Serial.println(F("execute")); gemini.execute(); }
    sending complete lines are therefore preferred (e.g. the Serial Monitor in
    the Arduibno GUI)
 */
-void handleSerial() { // Here we want to use Serial, rather than DebugOut
+void handleSerial() {
   char buf[INPUT_BUFFER_SIZE + 1];
   size_t buflen = Serial.readBytesUntil('\n', buf, INPUT_BUFFER_SIZE);
   buf[buflen] = 0;
