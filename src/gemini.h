@@ -90,7 +90,7 @@ public:
     }
 
     bool receive() {
-        return inputBuffer.pop();  
+        return inputBuffer.pull();  
     }
     uint8_t receiveByte(bool block = true) {
         if (!hasData(8)) {
@@ -105,7 +105,7 @@ public:
 
         uint8_t receivedByte = 0;
         for (int i = 7; i >= 0; i--) {
-            bool bitValue = inputBuffer.pop();
+            bool bitValue = inputBuffer.pull();
             receivedByte |= (bitValue << i);
         }
 

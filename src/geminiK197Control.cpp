@@ -18,16 +18,54 @@
 static GeminiK197Control::K197measurement defaultMeasurementResult;
 static GeminiK197Control::K197control defaultControlRequest;
 
+/*!
+     @brief  initialize the object.
+
+     @details begin should be called before using the object
+     
+     When begin is called without any argument, global default measurement (input) and control (output) objects are used. 
+     Note that all instances of the object will share the same global default objects
+
+     PREREQUISITES: Serial.begin must be called to see any error message
+
+     @return true if the call was succesful and the object can be used, false otherwise
+*/
 bool GeminiK197Control::begin() {
     return begin(&defaultMeasurementResult, &defaultControlRequest);
 }
 
+/*!
+     @brief  initialize the object.
+
+     @details begin should be called before using the object
+     
+     When begin is called with a single argument, NO control (output) buffer is assigned. 
+     This can be useful in case the object is only used for retrieving measurement result. 
+     Alternatively, a control buffer can be set with setControlBuffer(), 
+     or the application can include a control object directly in sendImmediately.
+
+     @param newInputBuffer pointer to a measurement (input) buffer to receive measurement results
+     @return true if the call was succesful and the object can be used, false otherwise
+*/
 bool GeminiK197Control::begin(K197measurement *newInputBuffer) {
     setControlBuffer(NULL, false);      
     inputBuffer=newInputBuffer; 
     return GeminiFrame::begin( (uint8_t *) inputBuffer, sizeof(K197measurement)/sizeof(uint8_t));  
 }
 
+/*!
+     @brief  initialize the object.
+
+     @details begin should be called before using the object
+     
+     When begin is called with two arguments, it is possible to use sendImmediately() without arguments 
+     and/or execute() to send a control frame to the K197. 
+     The application can also include a different control object directly in sendImmediately.
+
+     @param newInputBuffer pointer to a measurement (input) buffer to receive measurement results
+     @param newOutputBuffer pointer to a control (output) buffer that will be used as default for this object
+     @return true if the call was succesful and the object can be used, false otherwise
+*/
 bool GeminiK197Control::begin(K197measurement *newInputBuffer, K197control *newOutputBuffer) {
     setControlBuffer(newOutputBuffer, true);      
     inputBuffer=newInputBuffer; 
@@ -38,14 +76,14 @@ bool GeminiK197Control::begin(K197measurement *newInputBuffer, K197control *newO
 ***********          MEASUREMENT RESULT STRUCTURE                *************
 *****************************************************************************/
 
-const size_t GeminiK197Control::K197measurement::valueAsStringMinSize = 12;
-const size_t GeminiK197Control::K197measurement::resultAsStringMinSize = 16;
-const size_t GeminiK197Control::K197measurement::valueAsStringMinSizeEP = 14;
-const size_t GeminiK197Control::K197measurement::resultAsStringMinSizeEP = 18;
+const size_t GeminiK197Control::K197measurement::valueAsStringMinSize = 12;    ///< char[] lenght required by getValueAsString (incl. term. NULL)
+const size_t GeminiK197Control::K197measurement::resultAsStringMinSize = 16;   ///< char[] lenght required by getResultAsString (incl. term. NULL)
+const size_t GeminiK197Control::K197measurement::valueAsStringMinSizeER = 14;  ///< char[] lenght required by getValueAsStringER (incl. term. NULL)
+const size_t GeminiK197Control::K197measurement::resultAsStringMinSizeER = 18; ///< char[] lenght required by getResultAsStringER (incl. term. NULL)
 
-static double range_power[] {1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 1e1, 1e2, 1e3};
-static int8_t range_exponent[] {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-static int8_t range_baseline[] {3, 6, 0, 0};
+static double range_power[] {1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 1e1, 1e2, 1e3}; ///< used for internal calculations
+static int8_t range_exponent[] {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8}; ///< used for internal calculations
+static int8_t range_baseline[] {3, 6, 0, 0}; ///< used for internal calculations
 
 const char*GeminiK197Control::K197measurement::getUnitString() const {
     switch (byte0.unit) {

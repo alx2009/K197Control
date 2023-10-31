@@ -17,8 +17,16 @@
 
 #include "gemini.h"
 
-volatile bool inputEdgeDetected = false;
+volatile bool inputEdgeDetected = false; ///< flag, set in the interrupt handler
 
+/*!
+     @brief  initialize the object.
+
+     @details It should be called before using the object
+
+     PREREQUISITES: Serial.begin must be called to see any error message
+     @return true if the call was succesful and the object can be used, false otherwise
+*/
 bool GeminiProtocol::begin() {
     if ( digitalPinToInterrupt(inputPin) == NOT_AN_INTERRUPT ) {
         Serial.print(F("Error: Pin ")); Serial.print(inputPin); Serial.println(F(" does not support interrupts!"));
@@ -67,7 +75,7 @@ void GeminiProtocol::update() {
                         isInitiator = true;
                         fast_write(HIGH);
                         delayMicroseconds(writeDelayMicros);
-                        bool bitToSend = outputBuffer.pop();
+                        bool bitToSend = outputBuffer.pull();
                         fast_write(bitToSend);
                         frameEndDetected=false;
                         state = State::BIT_WRITE_WAIT_ACK;
@@ -102,7 +110,7 @@ void GeminiProtocol::update() {
                     } else {  // if we have data to send, we cannot stop until we have sent it all...
                         fast_write(HIGH);
                         delayMicroseconds(writeDelayMicros);
-                        bool bitToSend = outputBuffer.pop();
+                        bool bitToSend = outputBuffer.pull();
                         fast_write(bitToSend);
                         state = State::BIT_WRITE_WAIT_ACK;  
                     }

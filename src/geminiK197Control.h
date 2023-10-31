@@ -101,8 +101,8 @@ public:
     struct K197measurement {
         static const size_t valueAsStringMinSize;
         static const size_t resultAsStringMinSize;
-        static const size_t valueAsStringMinSizeEP;
-        static const size_t resultAsStringMinSizeEP;
+        static const size_t valueAsStringMinSizeER;
+        static const size_t resultAsStringMinSizeER;
     
     /*!
        @brief measurement frame
@@ -247,8 +247,8 @@ public:
     struct K197control {
         static const size_t valueAsStringMinSize;
         static const size_t resultAsStringMinSize;
-        static const size_t valueAsStringMinSizeEP;
-        static const size_t resultAsStringMinSizeEP;
+        static const size_t valueAsStringMinSizeER;
+        static const size_t resultAsStringMinSizeER;
     
         /*!
             @brief control frame

@@ -45,6 +45,20 @@ public:
                     
     }
 
+    /*!
+     @brief  initialize the object.
+
+     @details It should be called before using the object
+     Note that when begin is called with no argument, no input frame buffer is assigned but any data received will be left in the FIFO buffer.
+
+     This is useful in case an application want to have access the raw frame, including synchronization sequences and stop bits 
+     (the base class methods shall be used for that). IT is still possible to send a frame using sendFrame().
+
+     PREREQUISITES: Serial.begin must be called to see any error message
+
+     @return true if the call was succesful and the object can be used, false otherwise
+    */
+
     bool begin() {  // with this form of begin only the output is handled
         if (!GeminiProtocol::begin()) return false;
         pInputData=NULL;
@@ -58,6 +72,21 @@ public:
         return true;      
     }
   
+/*!
+     @brief  initialize the object.
+
+     @details It should be called before using the object
+     When a frame is received, pdata[0] will include the first sub-frame sent, 
+     pdata[1] the second and so on until the last sub-frame is stored in pdata[nbytes-1].
+     
+     Note that synchronization sequences and start bits are discarded, only the actual data is stored.
+
+     PREREQUISITES: Serial.begin must be called to see any error message
+
+     @param pdata point to a buffer where to store frame data
+     @param nbytes number of data in a frame
+     @return true if the call was succesful and the object can be used, false otherwise
+*/
     bool begin(uint8_t *pdata, uint8_t nbytes) {
         if ( (nbytes == 0) || (pdata == NULL) ) {
             return false;
