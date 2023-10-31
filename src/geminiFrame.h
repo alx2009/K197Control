@@ -44,19 +44,28 @@ public:
                    frameState=FrameState::WAIT_FRAME_START;
                     
     }
-  
-    bool begin(uint8_t *pdata, uint8_t nbytes) {
-        if ( (nbytes == 0) || (pdata == NULL) ) {
-            return false;
-        }
+
+    bool begin() {  // with this form of begin only the output is handled
         if (!GeminiProtocol::begin()) return false;
-        setInputBuffer(pdata, nbytes);
+        pInputData=NULL;
+        pInputData_len=0;
         frameState=FrameState::WAIT_FRAME_START;
 #   ifdef DEBUG_PORT // Make sure the following pins match the definition of DEBUG_PORT above!
         pinMode(A3, OUTPUT); // TODO: use direct port manipulation so the above is always verified...
         pinMode(A4, OUTPUT);
         DEBUG_FRAME_STATE();
 #   endif //DEBUG_PORT
+        return true;      
+    }
+  
+    bool begin(uint8_t *pdata, uint8_t nbytes) {
+        if ( (nbytes == 0) || (pdata == NULL) ) {
+            return false;
+        }
+        if (!begin()) {
+            return false;
+        }
+        setInputBuffer(pdata, nbytes);
         return true;
     }
 
@@ -71,7 +80,8 @@ public:
         GeminiProtocol::update();
         switch(frameState) {
             case FrameState::WAIT_FRAME_START:
-                if (hasData() ) {
+                // if pInputData == NULL means ignore input data
+                if (hasData() && (pInputData != NULL) ) {
                     while(hasData() && frameEndDetected) receive();
                 }
                 if (!frameEndDetected) {
@@ -83,7 +93,7 @@ public:
                 break;
 
             case FrameState::WAIT_FRAME_DATA:
-                if (hasData()) {
+                if ( hasData() && (pInputData != NULL) ) {
                     handleFrameData();
                 }
                 if ( frameEndDetected ) {
@@ -94,7 +104,8 @@ public:
                 break;
 
             case FrameState::FRAME_END:
-                while(hasData()) receive();
+                // if pInputData == NULL means ignore input data
+                while( hasData() && (pInputData != NULL) ) receive();
                 if ( frameEndDetected) {
                     frameState = FrameState::WAIT_FRAME_START;
                     DEBUG_FRAME_STATE();
@@ -121,14 +132,15 @@ public:
         if (hasData()) { // fill the frame
             if (start_bit) {
                 if (hasData(8)) {
-                   pdata[byte_counter] = receiveByte(false);
-                   DEBUG_PRINT(' '); DEBUG_PRINT(pdata[byte_counter], BIN);
+                   pInputData[byte_counter] = receiveByte(false);
+                   DEBUG_PRINT(' '); DEBUG_PRINT(pInputData[byte_counter], BIN);
                    byte_counter++;
                    start_bit = false;
                    if (frameComplete()) {
                        DEBUG_PRINT('>');
                    }
-                }
+                } 
+                // eventually we will have 8 bits or frameEndDetected in update() 
             } else {
                 start_bit = receive();
                 if (start_bit) {
@@ -148,7 +160,7 @@ public:
 
   public:
 
-    bool frameComplete() const { return byte_counter >= pdata_len ? true : false; }
+    bool frameComplete() const { return byte_counter >= pInputData_len ? true : false; }
     
     void resetFrame() {
         byte_counter=0;
@@ -156,8 +168,8 @@ public:
         DEBUG_PRINT('#');
     }
 
-    uint8_t *getFrame() { DEBUG_PRINT('@'); resetFrame(); return pdata;  };
-    uint8_t getFrameLenght() const { return pdata_len; };
+    uint8_t *getFrame() { DEBUG_PRINT('@'); resetFrame(); return pInputData;  };
+    uint8_t getFrameLenght() const { return pInputData_len; };
 
 
     bool frameTimeoutDetected() const {return frameTimeoutCounter>0 ? true : false;};
@@ -166,8 +178,8 @@ public:
 
     protected:
         void setInputBuffer(uint8_t *pdata, uint8_t nbytes, bool doResetFrame=false) {
-            this->pdata=pdata;
-            pdata_len=nbytes;
+            pInputData=pdata;
+            pInputData_len=nbytes;
             if (doResetFrame) resetFrame();
         }
     
@@ -175,8 +187,8 @@ public:
         bool checkFrameTimeout() {return micros() - lastBitReadTime >= frameTimeout ? true : false;};
         bool frameStarted() const { return (byte_counter >0 || start_bit==true) ? true : false; };
     
-        uint8_t *pdata=NULL;
-        uint8_t pdata_len;
+        uint8_t *pInputData=NULL;
+        uint8_t pInputData_len;
         uint8_t byte_counter=0;
         bool start_bit=false;        
 
@@ -187,6 +199,10 @@ public:
             WAIT_FRAME_DATA=1,
             FRAME_END=2,
         } frameState;
+
+    protected:
+     using GeminiProtocol::begin;
+
 };
 
 #endif //K197CTRL_GEMINI_FRAME_H
