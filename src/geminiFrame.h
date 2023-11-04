@@ -35,12 +35,38 @@
 # define DEBUG_PRINTLN(...) 
 #endif //DEBUG_GEMINI_FRAME
     
+/*!
+      @brief gemini frame layer handler
+
+      @details define a class implementing the frame layer of the gemini protocol specification
+      The frame layer is responsible for sending and receiving byte sequences as gemini frames
+
+      After construction, begin() must be called before using any other function. Then update() must be called on a regular basis.
+      
+      When data is received, it is stored in a frame input buffer. When a complete sequence of data has been received, frameComplete()
+      will return true. Data must be read with getFrame() before a new frame can be received (alternatively resetFrame() can be called).
+
+*/
 class GeminiFrame : public GeminiProtocol {   
 public:
-        GeminiFrame(uint8_t inputPin, uint8_t outputPin, unsigned long readDelayMicros, unsigned long writeDelayMicros,
-                   unsigned long handshakeTimeoutMicros, unsigned long readEndMicros, unsigned long writeEndMicros)
-        : GeminiProtocol(inputPin, outputPin, readDelayMicros, writeDelayMicros,
-                   handshakeTimeoutMicros, readEndMicros, writeEndMicros) {
+    /*!
+        @brief  constructor for the class. After construction the FIFO is empty.
+
+        @details See protocol specification for more information about the protocol and its timing
+        Note that handshakeTimeoutMicros is not implemented yet
+        
+        @param inputPin input pin. Must be able to detect an edge interrupt (on a UNO, only pin 2 and 3 can be used)
+        @param outputPin output pin. any I/O pin can be used
+        @param writePulseMicros minimum duration of the write pulse
+        @param handshakeTimeoutMicros timeout for handshakes. If no handshake received the transmission is aborted
+        @param readDelayMicros delay from the time an edge is detected on the input pin, to the time the bit value is read
+        @param writeDelayMicros minimum time when writing. After an edge is detected on the input pin (signaling 
+        the other peer has read the value on the output pin), wait at least writeDelayMicros before returning the outpout pin to LOW 
+    */
+        GeminiFrame(uint8_t inputPin, uint8_t outputPin, unsigned long writePulseMicros,
+                   unsigned long handshakeTimeoutMicros, unsigned long readDelayMicros, unsigned long writeDelayMicros)
+        : GeminiProtocol(inputPin, outputPin, writePulseMicros,
+                   handshakeTimeoutMicros, readDelayMicros, writeDelayMicros) {
                    frameState=FrameState::WAIT_FRAME_START;
                     
     }

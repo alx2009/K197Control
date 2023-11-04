@@ -27,7 +27,7 @@
 #define OUTPUT_FIFO_SIZE FIFO_SIZE ///< size of the output FIFO
 
 /*!
-      @brief define a class implemeted a FIFO buffer
+      @brief define a class implementing a FIFO buffer
 
       @details Records can be puished to the tail and pulled from the head of the buffer, first in first out(FIFO)
       A bool is used to represent a single bit value (0= false, 1= true). 

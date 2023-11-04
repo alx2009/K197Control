@@ -23,10 +23,24 @@
 
 class GeminiK197Control : public GeminiFrame {   
 public:
-        GeminiK197Control(uint8_t inputPin, uint8_t outputPin, unsigned long readDelayMicros, unsigned long writeDelayMicros,
-                   unsigned long handshakeTimeoutMicros, unsigned long readEndMicros, unsigned long writeEndMicros)
-        : GeminiFrame(inputPin, outputPin, readDelayMicros, writeDelayMicros,
-                   handshakeTimeoutMicros, readEndMicros, writeEndMicros) {
+    /*!
+        @brief  constructor for the class.
+
+        @details See protocol specification for more information about the protocol and its timing
+        Note that handshakeTimeoutMicros is not implemented yet
+        
+        @param inputPin input pin. Must be able to detect an edge interrupt (on a UNO, only pin 2 and 3 can be used)
+        @param outputPin output pin. any I/O pin can be used
+        @param writePulseMicros minimum duration of the write pulse
+        @param handshakeTimeoutMicros timeout for handshakes. If no handshake received the transmission is aborted
+        @param readDelayMicros delay from the time an edge is detected on the input pin, to the time the bit value is read
+        @param writeDelayMicros minimum time when writing. After an edge is detected on the input pin (signaling 
+        the other peer has read the value on the output pin), wait at least writeDelayMicros before returning the outpout pin to LOW 
+    */
+        GeminiK197Control(uint8_t inputPin, uint8_t outputPin, unsigned long writePulseMicros,
+                   unsigned long handshakeTimeoutMicros, unsigned long readDelayMicros, unsigned long writeDelayMicros)
+        : GeminiFrame(inputPin, outputPin, writePulseMicros,
+                   handshakeTimeoutMicros, readDelayMicros, writeDelayMicros) {
                     
     }
 
@@ -330,6 +344,8 @@ public:
         if (outputBuffer == NULL) return;
         outputQueued=true;
     };
+
+    bool serverStartup();
 
   private: 
     K197measurement *inputBuffer=NULL;

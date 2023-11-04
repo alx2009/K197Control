@@ -254,3 +254,31 @@ void GeminiK197Control::K197control::setSendStoredReadings(bool sendStored) {
   byte2.sent_readings = sendStored;
   byte2.set_sent_readings = true;  
 }
+
+bool GeminiProtocol::serverStartup(unsigned long timeout_micros) {
+    if (timeout_micros!=0) {
+        if (!waitInputEdge(timeout_micros)) {
+            return false;
+        }
+    } else {
+        waitInputEdge();
+    }
+    pulse(1684);
+    delayMicroseconds(60);
+    pulse(20);
+
+    if (!waitInputIdle(50000UL)) {
+      return false;
+    }
+    delay(35);
+
+    uint8_t initial_data = 0x80;
+    send(initial_data);
+    send(false);
+
+    while(hasData(9) == false) update();
+    //delayMicroseconds(100);
+    pulse(30);
+    setInitiatorMode(false);
+    return true;
+}

@@ -18,6 +18,16 @@
 #include "gemini.h"
 
 volatile bool inputEdgeDetected = false; ///< flag, set in the interrupt handler
+/*!
+     @brief  interrupt handler.
+
+     @details this is the interrupt detecting the rising edge on the input pin
+     when begin() is called, this handler is attached to the input pin with attachInterrupt()
+
+*/
+void risingEdgeInterrupt() {
+    inputEdgeDetected = true;
+}
 
 /*!
      @brief  initialize the object.
@@ -49,10 +59,17 @@ bool GeminiProtocol::begin() {
     return true;
 }
 
-void risingEdgeInterrupt() {
-    inputEdgeDetected = true;
-}
+/*!
+     @brief  main input/output handler
 
+     @details in this function we update the internal state machine, reading and writing data as required 
+     by the first layer of the gemini protocol specification
+
+     The gemini protocol does not require a strict timing at eitehr side, however update() should be called as often 
+     as possible (at least once every loop() iteraction) to achieve maximum possible throughput and lowest possible latency
+
+     If this function is not called for a significant amount of time, the protocol may time-out and abort the current frame transmission
+*/
 void GeminiProtocol::update() {
         unsigned long currentTime = micros();
         
@@ -74,7 +91,7 @@ void GeminiProtocol::update() {
                     if ( canBeInitiator && (outputBuffer.size()>0) ) {
                         isInitiator = true;
                         fast_write(HIGH);
-                        delayMicroseconds(writeDelayMicros);
+                        delayMicroseconds(writePulseMicros);
                         bool bitToSend = outputBuffer.pull();
                         fast_write(bitToSend);
                         frameEndDetected=false;
@@ -89,7 +106,7 @@ void GeminiProtocol::update() {
                 }
                 break;
             case State::BIT_READ_START:
-                if (currentTime - lastBitReadTime >= readEndMicros) {
+                if (currentTime - lastBitReadTime >= readDelayMicros) {
                     bool bitValue = fast_read();
                     inputBuffer.push(bitValue);
 
@@ -103,13 +120,13 @@ void GeminiProtocol::update() {
                             }
                         } else { // must send an acknowledge
                             fast_write(HIGH);           
-                            delayMicroseconds(writeDelayMicros);
+                            delayMicroseconds(writePulseMicros);
                             fast_write(false);
                             state = State::IDLE;
                         }
                     } else {  // if we have data to send, we cannot stop until we have sent it all...
                         fast_write(HIGH);
-                        delayMicroseconds(writeDelayMicros);
+                        delayMicroseconds(writePulseMicros);
                         bool bitToSend = outputBuffer.pull();
                         fast_write(bitToSend);
                         state = State::BIT_WRITE_WAIT_ACK;  
@@ -131,7 +148,7 @@ void GeminiProtocol::update() {
                 break;
 
             case State::BIT_WRITE_END: 
-                if (currentTime - lastBitReadTime >= writeEndMicros) {
+                if (currentTime - lastBitReadTime >= writeDelayMicros) {
                         fast_write(false);
                         state = State::BIT_READ_START;
                         lastBitReadTime = currentTime;
@@ -144,6 +161,22 @@ void GeminiProtocol::update() {
         }
 }
 
+/*!
+     @brief  wait for a positive edge on the input pin
+
+     @details this is a helper function that waits for a transition on the input pin
+     This function will block until a positive edge is detected on the input pin or a timeout occurs. 
+     Only interrupt handlers are running while this function is waiting.
+
+     Note that this function will reset the edge detection, so the next update() will not detect the same input edge. This is by design.
+
+     This function is not required at all to imnplement the gemini protocol, but it can be useful in special circumstances.
+     For example, at startup an application may want to display an error message if the peer is not running.
+
+     @param timeout_micros timeout in microseconds
+     @return true if an edge was detected, false if the function returns due to timeout
+
+*/
 bool GeminiProtocol::waitInputEdge(unsigned long timeout_micros) {
         unsigned long currentTime = micros();
         unsigned long waitStartTime = currentTime;
@@ -165,6 +198,19 @@ bool GeminiProtocol::waitInputEdge(unsigned long timeout_micros) {
         return true;
     }
 
+/*!
+     @brief  wait for a positive edge on the input pin
+
+     @details this is a helper function that waits for a transition on the input pin
+     This function will block until a positive edge is detected on the input pin. 
+     Only interrupt handlers are running while this function is waiting.
+
+     Note that this function will reset the edge detection, so the next update() will not detect the same input edge. This is by design.
+
+     This function is not required at all to imnplement the gemini protocol, but it can be useful in special circumstances.
+     For example, at startup an application may want to display an error message if the peer is not running.
+
+*/
 void GeminiProtocol::waitInputEdge() {
         volatile bool wait = true;
         while( wait ) {
@@ -177,6 +223,18 @@ void GeminiProtocol::waitInputEdge() {
         } 
 }
 
+/*!
+     @brief  wait for the input pin to be LOW
+
+     @details this is a helper function that waits for the input pin to be LOW
+     This function will block until the input pin is low or a timeout occurs. 
+     Only interrupt handlers are running while this function is waiting.
+
+     This function is not required at all to imnplement the gemini protocol, but it can be useful in special circumstances.
+     For example, at startup an application may want to detect a pulse lasting 100 microseconds or less on the input pin. 
+     This can be achieved calling waitInputEdge() and waitInputIdle(100) one after the other.
+
+*/
 bool GeminiProtocol::waitInputIdle(unsigned long timeout_micros) {
         unsigned long currentTime = micros();
         unsigned long waitStartTime = micros();
@@ -190,32 +248,4 @@ bool GeminiProtocol::waitInputIdle(unsigned long timeout_micros) {
             }            
         }
         return true;
-}
-
-bool GeminiProtocol::serverStartup(unsigned long timeout_micros) {
-    if (timeout_micros!=0) {
-        if (!waitInputEdge(timeout_micros)) {
-            return false;
-        }
-    } else {
-        waitInputEdge();
-    }
-    pulse(1684);
-    delayMicroseconds(60);
-    pulse(20);
-
-    if (!waitInputIdle(50000UL)) {
-      return false;
-    }
-    delay(35);
-
-    uint8_t initial_data = 0x80;
-    send(initial_data);
-    send(false);
-
-    while(hasData(9) == false) update();
-    //delayMicroseconds(100);
-    pulse(30);
-    setInitiatorMode(false);
-    return true;
 }
