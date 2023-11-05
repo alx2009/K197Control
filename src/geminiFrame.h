@@ -43,9 +43,12 @@
 
       After construction, begin() must be called before using any other function. Then update() must be called on a regular basis.
       
-      When data is received, it is stored in a frame input buffer. When a complete sequence of data has been received, frameComplete()
+      When data is received, it is stored in uint8_t array passed at begin(). When a complete sequence of data has been received, frameComplete()
       will return true. Data must be read with getFrame() before a new frame can be received (alternatively resetFrame() can be called).
 
+      When no array is passed at begin(), the function can only be used to receive data.
+
+      The method sendFrame()is used to send a uint8_t array in a gemini frame.
 */
 class GeminiFrame : public GeminiProtocol {   
 public:
@@ -78,13 +81,12 @@ public:
      Note that when begin is called with no argument, no input frame buffer is assigned but any data received will be left in the FIFO buffer.
 
      This is useful in case an application want to have access the raw frame, including synchronization sequences and stop bits 
-     (the base class methods shall be used for that). IT is still possible to send a frame using sendFrame().
+     (the base class methods shall be used for that). It is still possible to send a frame using sendFrame().
 
      PREREQUISITES: Serial.begin must be called to see any error message
 
      @return true if the call was succesful and the object can be used, false otherwise
     */
-
     bool begin() {  // with this form of begin only the output is handled
         if (!GeminiProtocol::begin()) return false;
         pInputData=NULL;
@@ -124,6 +126,17 @@ public:
         return true;
     }
 
+/*!
+     @brief  send a sequence of bytes as a frame to the lower layer
+     @details this function send a sequence of bytes as a frame
+     each byte is prepended with a start bit, as required by the Gemini Frame specification
+
+     This function does not send any synchronization sequence at the beginning or end of the frame. If required, the methods of the 
+     base class can be used to send any number of 0 bits before and after calling sendFrame()
+
+     @param pdata pointer to an array of uint8_t with the bytes to send (without any start/stop bits)
+     @param nbytes number of bytes to send
+*/
     void sendFrame(uint8_t *pdata, uint8_t nbytes) {
         for(uint8_t i=0; i<nbytes; i++) {
             send(true);
@@ -131,11 +144,22 @@ public:
         }
     }
     
+    /*!
+       @brief  main input/output handler
+
+       @details in this function we update the internal state machine, reading and writing data as required 
+       by the K197
+
+       The gemini protocol does not require a strict timing at either side, however update() should be called as often 
+       as possible (at least once every loop() iteraction) to achieve maximum possible throughput and lowest possible latency
+
+       If this function is not called for a significant amount of time, the protocol may time-out and abort the current frame transmission
+    */
     void update() {
         GeminiProtocol::update();
         switch(frameState) {
             case FrameState::WAIT_FRAME_START:
-                // if pInputData == NULL means ignore input data
+                // pInputData == NULL means ignore input data
                 if (hasData() && (pInputData != NULL) ) {
                     while(hasData() && frameEndDetected) receive();
                 }
@@ -171,6 +195,10 @@ public:
     }    
 
   private:
+    /*!
+       @brief  private function, handles data while a frame is being received
+       @details this function is called by GeminiFrame(), it is not intended for any other use
+    */
     void handleFrameData() {
         if (frameComplete()) {
             while(hasData()) {
@@ -215,14 +243,53 @@ public:
 
   public:
 
+    /*!
+       @brief check if a complete frame is available
+       @details when this function returns true, a complete frame as been received and is available to the caller 
+       e.g. using getFrame().
+       Once a new frame is available, no more frames will be received until one of getFrame() or resetFrame() is called
+       @return true if a complete new frame has been received and is available in the current input buffer
+    */
     bool frameComplete() const { return byte_counter >= pInputData_len ? true : false; }
     
+    /*!
+       @brief reset the current input buffer
+       @details after this function is called, the input buffer can receive a new measurement
+       Note that the data in the buffer is not actually changed until new data is actually received from the K197
+       see also getFrame()
+    */
     void resetFrame() {
         byte_counter=0;
         start_bit=false;
         DEBUG_PRINT('#');
     }
 
+    /*!
+       @brief get the current input buffer
+       @return pointer to the current input buffer
+    */
+    uint8_t *getInputBuffer() { return pInputData;  };
+    /*!
+       @brief get the current input buffer size
+       @return pointer to the size of the current input buffer
+    */
+    uint8_t getInputBufferSize() { return ;  };
+      
+    /*!
+       @brief get the current input buffer and reset the frame
+       @details tipically this function is called in the main loop, right after frameComplete() returns true,
+       to process the data received in a new frame.
+       After this function is called, the input buffer can receive a new measurement (same as calling resetFrame())
+       The data in the buffer is not actually changed until new data is actually received from the K197
+       update() should be called while processing the frame if the processing takes a significant time 
+       (even after a complete frame is received, the object may need to handle further handshakes and/or synchronization sequences).
+       
+       When using this function, the caller must process the new frame quick enough to avoid any data overrun
+       
+       Alternatively, the caller can use getInputBuffer() and then call resetFrame() once is done processing. 
+       In such a case, make sure that the FIFO in the lower layer is large enough to buffer multiple frames 
+       otherwise one or more frames will be lost when the FIFO buffer is full
+    */
     uint8_t *getFrame() { DEBUG_PRINT('@'); resetFrame(); return pInputData;  };
     uint8_t getFrameLenght() const { return pInputData_len; };
 

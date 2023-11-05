@@ -29,7 +29,7 @@
 /*!
       @brief define a class implementing a FIFO buffer
 
-      @details Records can be puished to the tail and pulled from the head of the buffer, first in first out(FIFO)
+      @details Records can be pushed to the tail and pulled from the head of the buffer, first in first out(FIFO)
       A bool is used to represent a single bit value (0= false, 1= true). 
       TODO: could be improved to pack 8 bools in one bit, right now we waste a lot of RAM 
 */

@@ -83,6 +83,21 @@ public:
 
     void update();
 
+    
+/*!
+     @brief  send 8 bits of data to the peer
+     @details this function pushes 8 bits of data to the tail of the output buffer, for subsequent transmission.
+     Data in the output FIFO is sent by update() as soon as possible:
+     - if the object can be an initiator and no communication is in progress, the next time update() is called initates the transmission
+     - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
+     - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
+
+     If the caller want to ansure data starts a new frame, 
+   
+     @param data the data to be sent
+
+     @return true if all the bits have been queued for transmission
+*/
     bool send(uint8_t data) {
         for (int i = 7; i >= 0; i--) {
             bool bitToSend = (data >> i) & 1;
