@@ -255,7 +255,7 @@ void GeminiK197Control::K197control::setSendStoredReadings(bool sendStored) {
   byte2.set_sent_readings = true;  
 }
 
-bool GeminiProtocol::serverStartup(unsigned long timeout_micros) {
+bool GeminiK197Control::serverStartup(unsigned long timeout_micros) {
     if (timeout_micros!=0) {
         if (!waitInputEdge(timeout_micros)) {
             return false;

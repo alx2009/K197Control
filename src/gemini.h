@@ -84,7 +84,7 @@ public:
     void update();
 
     
-/*!
+   /*!
      @brief  send 8 bits of data to the peer
      @details this function pushes 8 bits of data to the tail of the output buffer, for subsequent transmission.
      Data in the output FIFO is sent by update() as soon as possible:
@@ -92,12 +92,11 @@ public:
      - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
      - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
 
-     If the caller want to ansure data starts a new frame, 
-   
-     @param data the data to be sent
-
-     @return true if all the bits have been queued for transmission
-*/
+     Note that as of now there is no way for a caller to know if the output buffer has a given amount of free space. The only way to be sure that the send will succeed is
+     to wait until noOutputPending() returns true beforre sending new data.
+     @param data a single byte of data
+     @return true if all the 8 boits in data have been sent. False if one or more bits could not be sent (output buffer full).
+    */
     bool send(uint8_t data) {
         for (int i = 7; i >= 0; i--) {
             bool bitToSend = (data >> i) & 1;
@@ -108,6 +107,19 @@ public:
         return true; // All bits sent successfully
     }
 
+   /*!
+     @brief  send one bit of data to the peer
+     @details this function pushes a single bit of data to the tail of the output buffer, for subsequent transmission.
+     Data in the output FIFO is sent by update() as soon as possible:
+     - if the object can be an initiator and no communication is in progress, the next time update() is called initates the transmission
+     - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
+     - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
+
+     To check if there is enough space in output buffer for a given amou tof data, use canSend().
+     
+     @param data a single byte of data
+     @return true if the bit has been pushed. False if one or more bits could not be pushed (output buffer full).
+    */
     bool send(bool bit) {
         if (outputBuffer.full()) {
             return false; // Buffer is full
@@ -116,16 +128,40 @@ public:
         return true;
     }
 
+   /*!
+     @brief  check if there is unread data in the input buffer
+     @return true if there is at least one bit in the input buffer. false otherwise
+    */
     bool hasData() const {
         return !inputBuffer.empty();
     }
+   /*!
+     @brief  check if there is unread data in the input buffer
+     @param n the number of data to check
+     @return true if there is at least n bits of data in the input buffer. false otherwise
+    */
     bool hasData(uint8_t n) const {
         return inputBuffer.size() >= n;
     }
 
+   /*!
+     @brief  receives one bit of data
+     @detail note that when this function returns false, there is no way to know if the input buffer was empty or the received bit was zero. 
+     It is recommended to use hasData() before calling this function
+     @return true if the received bit has a value of 1 (HIGH). False otherwise.
+    */
     bool receive() {
         return inputBuffer.pull();  
     }
+    
+   /*!
+     @brief  receive one byte of data
+     @detail note that when block= false, there is no way to know if the input buffer was empty or all the bits werre set to 0 (LOW). 
+     It is recommended to use hasData(8) before calling this function in non blocking mode
+     In blocking mode, update() is called in a loop while waiting
+     @param block if true (default) the function blocks until at least 8 bits are available in the input buffer. 
+     @return returns 8 bits of data.
+    */
     uint8_t receiveByte(bool block = true) {
         if (!hasData(8)) {
             if (block) {
@@ -146,9 +182,33 @@ public:
         return receivedByte;
     }
 
+   /*!
+     @brief  check free space in the output buffer
+     @param nbits the number of bits to check
+     @return true if there is room in the output buffer to send nbits of data. False otherwise
+    */
+    bool canSend(size_t nbits=1) { return nbits >= (OUTPUT_FIFO_SIZE-outputBuffer.size()) ? true : false;};
+   /*!
+     @brief  check if output pending
+     @details output pending means that the output buffer still contains data 
+     @return true if output is pending, false otherwise
+    */
     bool isOutputPending() {return !outputBuffer.empty();};
+   /*!
+     @brief  check if no output pending
+     @details output pending means that the output buffer still contains data 
+     @return true if no output is pending, false otherwise
+    */
     bool noOutputPending() {return outputBuffer.empty();};
 
+   /*!
+     @brief  generate an edge or pulse on the output pin
+     @details the function set the output pin to HIGH, waits a number of microseconds (using delayMicroseconds)
+     and then set the pin to the requested final state. 
+     It is used internally, but it is also available for special uses (for example during startup)
+     @param microseconds the minimum duration of the edge or the duration of the pulse
+     @param finalState if false a pulse is generated. If true a positive edge is generated
+    */
     void pulse(unsigned long microseconds, bool finalState=false) {
         fast_write(true);
         delayMicroseconds(microseconds);
@@ -162,10 +222,18 @@ public:
     bool getInitiatorMode() {return canBeInitiator;};
     void setInitiatorMode(bool newMode) {canBeInitiator=newMode;};
 
-    bool serverStartup(unsigned long timeout_micros=0L);
-
 private:
+   /*!
+     @brief  read the input pin using AVR registers directly
+     @details the Arduino functions are too slow so using direct I/O is required
+     @return true if the input pin is high, false otherwise
+    */
     inline bool fast_read() { return (*inputRegister & inputBitmask) != 0 ? true : false; };
+   /*!
+     @brief  write tpo the output pin using AVR registers directly
+     @details the Arduino functions are too slow so using direct I/O is required
+     @param value if true the output pin is set to HIGH, otherwise LOW
+    */
     inline void fast_write(bool value) {
         if (value) {                
             *outputRegister |= outputBitmask;      
@@ -175,35 +243,49 @@ private:
     };
         
 private:
-    uint8_t inputPin;
-    uint8_t outputPin;
-    uint8_t inputBitmask=0x00;
-    uint8_t outputBitmask=0x00;
-    volatile uint8_t *inputRegister=NULL;
-    volatile uint8_t *outputRegister=NULL;
+    uint8_t inputPin;  ///< input pin
+    uint8_t outputPin; ///< output pin
+    uint8_t inputBitmask=0x00; ///< bitmask used by fast_read()
+    uint8_t outputBitmask=0x00; ///< bitmask used by fast_write()
+    volatile uint8_t *inputRegister=NULL; ///< AVR register address used by fast_read()
+    volatile uint8_t *outputRegister=NULL; ///< AVR register address used by fast_write()
 
-    unsigned long writePulseMicros;
-    unsigned long handshakeTimeoutMicros;
-    unsigned long readDelayMicros;
-    unsigned long writeDelayMicros;
+    unsigned long writePulseMicros; ///< minimum duration of the write pulse
+    unsigned long handshakeTimeoutMicros; ///< Timeout for handshakes. If no handshake received the transmission is aborted
+    unsigned long readDelayMicros; ///< readDelayMicros delay from the time an edge is detected on the input pin, to the time the bit value is read
+    unsigned long writeDelayMicros; ///< writeDelayMicros minimum time when writing
 
-    bool canBeInitiator = true;
-    bool isInitiator = false;
+    bool canBeInitiator = true; ///< when true this object can initiate a data transfer. Otherwise it has to wait for the peer to initiate the transfer before sending any data
+    bool isInitiator = false; ///< set to true when we initiate a transfer, goes back to false when the last bit of data in the outputBuffer has been sent 
 
+   /*!
+     @brief  keep track of the internal state of the transfer 
+    */
     enum class State {
-        IDLE=0,
-        BIT_READ_START=1,
-        BIT_WRITE_WAIT_ACK=2,
-        BIT_WRITE_END=3,
+        IDLE=0,                ///< idle state (input and output LOW, no data being transferred in either direction)
+        BIT_READ_START=1,      ///< waiting for readDelayMicros before reading data
+        BIT_WRITE_WAIT_ACK=2,  ///< waiting for a positive edge on the input pin
+        BIT_WRITE_END=3,       ///< waiting for writeDelayMicros after detecting a positive egde on the input pin
     } state;
 
-    boolFifo inputBuffer;
-    boolFifo outputBuffer;
+    boolFifo inputBuffer; ///< the input buffer
+    boolFifo outputBuffer; ///< the output buffer
 
 protected:
-    unsigned long lastBitReadTime;
-    unsigned long frameTimeout=50000L;
+    unsigned long lastBitReadTime; ///< keep track of the time the last bit was read from the input pin
+    unsigned long frameTimeout=50000L; ///< the frame timeout value
+    
+   /*!
+     @brief  set the frame timeout value (default at begin() is 5000 us
+     @details this is a protected function, to be used in the sub-class implementing the frame layer
+     @param newValue the new timeout value to set
+    */
     void setFrameTimeout(unsigned long newValue) {frameTimeout=newValue;};
+   /*!
+     @brief  get the frame timeout value
+     @details this is a protected function, to be used in the sub-class implementing the frame layer
+     @return the current frame timeout value
+    */
     unsigned long getFrameTimeout() const {return frameTimeout;};
 
 /*!

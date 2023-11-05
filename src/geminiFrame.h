@@ -273,7 +273,7 @@ public:
        @brief get the current input buffer size
        @return pointer to the size of the current input buffer
     */
-    uint8_t getInputBufferSize() { return ;  };
+    uint8_t getInputBufferSize() { return pInputData_len;  };
       
     /*!
        @brief get the current input buffer and reset the frame

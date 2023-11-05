@@ -481,7 +481,7 @@ public:
         outputQueued=true;
     };
 
-    bool serverStartup();
+    bool serverStartup(unsigned long timeout_micros);
 
   private: 
     K197measurement *inputBuffer=NULL;
