@@ -245,9 +245,9 @@ public:
 
     /*!
        @brief check if a complete frame is available
-       @details when this function returns true, a complete frame as been received and is available to the caller 
-       e.g. using getFrame().
-       Once a new frame is available, no more frames will be received until one of getFrame() or resetFrame() is called
+       @details when this function returns true, a complete frame has been received and is available to the caller, 
+       for example using getFrame().
+       Once a new frame is available, no more frames will be received until either getFrame() or resetFrame() is called
        @return true if a complete new frame has been received and is available in the current input buffer
     */
     bool frameComplete() const { return byte_counter >= pInputData_len ? true : false; }
@@ -255,8 +255,8 @@ public:
     /*!
        @brief reset the current input buffer
        @details after this function is called, the input buffer can receive a new measurement
-       Note that the data in the buffer is not actually changed until new data is actually received from the K197
-       see also getFrame()
+       Note that the data in the buffer is not actually changed until new data is actually received from the K197.
+       See also getFrame()
     */
     void resetFrame() {
         byte_counter=0;
@@ -291,14 +291,40 @@ public:
        otherwise one or more frames will be lost when the FIFO buffer is full
     */
     uint8_t *getFrame() { DEBUG_PRINT('@'); resetFrame(); return pInputData;  };
+    /*!
+       @brief get the current input frame buffer size
+       @return the size (number of bytes) of the current input frame buffer
+    */
     uint8_t getFrameLenght() const { return pInputData_len; };
 
-
+    /*!
+       @brief check if a frame timeout has been detected 
+       @details the function checks if a frame timoeut has been detected before receiving a complete frame
+       this flag is reset when the function resetFrameTimeoutCounter() is called
+       @return true if a frame timout was detected, false otherwise
+    */
     bool frameTimeoutDetected() const {return frameTimeoutCounter>0 ? true : false;};
+    /*!
+       @brief get the frame timeout counter 
+       @details the frame timeout counter is incremented any time a frame timout 
+       is detected before receiving a complete frame. the counter is reset
+       when the function resetFrameTimeoutCounter() is called
+       @return the value of the frame timeout counter 
+    */
     unsigned long getFrameTimeoutCounter() const {return frameTimeoutCounter;};
+    /*!
+       @brief reset the frame timeout counter 
+       @details For more information see frameTimeoutDetected() and getFrameTimeoutCounter()
+    */
     void resetFrameTimeoutCounter() { frameTimeoutCounter = 0L;};
 
     protected:
+        /*!
+            @brief set the inut frame buffer 
+            @details this function is used to set the input frame buffer
+            It is intended for use in a sub-class that may need to use a more specialized
+            data structure rather than a generic byte array
+        */
         void setInputBuffer(uint8_t *pdata, uint8_t nbytes, bool doResetFrame=false) {
             pInputData=pdata;
             pInputData_len=nbytes;
@@ -306,21 +332,33 @@ public:
         }
     
     private: 
+        /*!
+            @brief detect a frame timeout  
+            @details this function is used internally to check the frame timout timer
+            A user of this object as well as a sub-class should use frameTimeoutDetected()
+        */
         bool checkFrameTimeout() {return micros() - lastBitReadTime >= frameTimeout ? true : false;};
+        /*!
+            @brief check if a frame reception has started  
+            @details this function is used internally to check if a frame has started
+        */
         bool frameStarted() const { return (byte_counter >0 || start_bit==true) ? true : false; };
     
-        uint8_t *pInputData=NULL;
-        uint8_t pInputData_len;
-        uint8_t byte_counter=0;
-        bool start_bit=false;        
+        uint8_t *pInputData=NULL; ///< pointer to the input frame buffer
+        uint8_t pInputData_len;   ///< array lenght of the input frame buffer
+        uint8_t byte_counter=0;   ///< while a frame is received, keeps track of the current byte 
+        bool start_bit=false;     ///< set when a start bit is received, reset after the last bit of a byte has been received
 
-        unsigned long frameTimeoutCounter=0;
+        unsigned long frameTimeoutCounter=0; ///< frame timeout counter
 
+        /*!
+            @brief state machine for the gemini frame layer  
+        */
         enum class FrameState {
-            WAIT_FRAME_START=0,
-            WAIT_FRAME_DATA=1,
-            FRAME_END=2,
-        } frameState;
+            WAIT_FRAME_START=0, ///< waiting for a frame transmission to start
+            WAIT_FRAME_DATA=1,  ///< set after the first bit of a frame is received
+            FRAME_END=2, ///< set after the last bit of a frame is received 
+        } frameState; ///< keep track of the state for the gemini frame protocol
 
     protected:
      using GeminiProtocol::begin;

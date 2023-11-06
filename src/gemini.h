@@ -84,18 +84,19 @@ public:
     void update();
 
     
-   /*!
-     @brief  send 8 bits of data to the peer
-     @details this function pushes 8 bits of data to the tail of the output buffer, for subsequent transmission.
-     Data in the output FIFO is sent by update() as soon as possible:
-     - if the object can be an initiator and no communication is in progress, the next time update() is called initates the transmission
-     - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
-     - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
+     /*!
+         @brief  send 8 bits of data to the peer
+         @details this function pushes 8 bits of data to the tail of the output buffer, for subsequent transmission.
+         Data in the output FIFO is sent by update() as soon as possible:
+         - if the object can be an initiator and no communication is in progress, the next time update() is called initates the transmission
+         - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
+         - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
 
-     Note that as of now there is no way for a caller to know if the output buffer has a given amount of free space. The only way to be sure that the send will succeed is
-     to wait until noOutputPending() returns true beforre sending new data.
-     @param data a single byte of data
-     @return true if all the 8 boits in data have been sent. False if one or more bits could not be sent (output buffer full).
+         To check if there is enough space in output buffer for one byte, use canSend(8). 
+         Alternatively, wait until noOutputPending() returns true beforre sending new data.
+     
+         @param data a single byte of data
+         @return true if all the 8 boits in data have been sent. False if one or more bits could not be sent (output buffer full).
     */
     bool send(uint8_t data) {
         for (int i = 7; i >= 0; i--) {
@@ -115,7 +116,8 @@ public:
      - if the object cannot be an initiator but a communication is already in progress (no frame end detected), data will be sent after any other data already in the FIFO
      - Otherwise if a communication is already in progress, all data in the FIFO are sent sequentially
 
-     To check if there is enough space in output buffer for a given amou tof data, use canSend().
+     To check if there is enough space in output buffer for one bit, use canSend(). 
+     Alternatively, wait until noOutputPending() returns true beforre sending new data.
      
      @param data a single byte of data
      @return true if the bit has been pushed. False if one or more bits could not be pushed (output buffer full).

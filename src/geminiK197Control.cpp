@@ -15,8 +15,8 @@
 */
 #include "GeminiK197Control.h"
 
-static GeminiK197Control::K197measurement defaultMeasurementResult;
-static GeminiK197Control::K197control defaultControlRequest;
+static GeminiK197Control::K197measurement defaultMeasurementResult; ///< default meaurement buffer
+static GeminiK197Control::K197control defaultControlRequest;        ///< default control buffer
 
 /*!
      @brief  initialize the object.
@@ -85,6 +85,14 @@ static double range_power[] {1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e
 static int8_t range_exponent[] {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8}; ///< used for internal calculations
 static int8_t range_baseline[] {3, 6, 0, 0}; ///< used for internal calculations
 
+
+/*!
+     @brief  get the unit string.
+     @details returns a null terminated char array with the unit. 
+     Same format as used by the K197 IEEE-488 card: ACV, DCV, OHM, ACA, DCA, ACD, DCD 
+     (ACV = Volt AC, ... DCD = DC decibels). See the instruction manual for the K197 IEEE-488 for more information
+     @return a null terminated char array with the unit
+*/
 const char*GeminiK197Control::K197measurement::getUnitString() const {
     switch (byte0.unit) {
         case K197unit::Volt : return byte0.ac_dc ? "ACV" : "DCV";      
@@ -95,6 +103,17 @@ const char*GeminiK197Control::K197measurement::getUnitString() const {
     return ""; // remove warning about missing return statement
 }
 
+/*!
+     @brief  get the exponent of the measurement value.
+     @details the power of 10 that should be multiplied to the displayed value when the latter is normalized.
+     With normalized, we mean that the decimal point is after the most significant digit in the display.
+     Note that the exponent is always referred to the unit returned by getUnitString(), 
+     not the unit displayed by the voltmeter on the front panel
+     For example, when the voltmeter shows 200.000 mV, the normalized value would be 2.00000
+     and getValueExponent() would return -1 (2.00000E-1 V = 0.200000V = 200.000 mV)
+     
+     @return the exponent to use in combination with unit, etc. 
+*/
 int8_t GeminiK197Control::K197measurement::getValueExponent() const {
     return range_exponent[range_baseline[byte0.unit]+byte0.range];
 }
@@ -103,6 +122,12 @@ int8_t GeminiK197Control::K197measurement::getValueExponent() const {
 //       Standard resolution functions
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+/*!
+     @brief  get the absolute value of the measurement as unsigned long integer
+     @details the absolute value of the measurement is the displayed value, without decimal point
+     For example, if the display shows -200.000 mV, the absolute value would be 200000 
+     @return value of the measurement as unsigned long integer
+*/    
 unsigned long GeminiK197Control::K197measurement::getAbsValue() const { 
     uint64_t uuvalue = getCount();
     uuvalue = uuvalue * 3125;  // multiply first to avoid losing accuracy. This is why we need a 64 bit integer...
@@ -110,14 +135,38 @@ unsigned long GeminiK197Control::K197measurement::getAbsValue() const {
     return uuvalue;
 }
 
+/*!
+     @brief  get the value of the measurement as long integer
+     @details the value of the measurement is the displayed value, included the sign but without the decimal point
+     For example, if the display shows -200.000 mV, the value would be -200000 
+     @return value of the measurement as long integer
+*/    
 long GeminiK197Control::K197measurement::getValue() const {
     return byte1.negative ? -getAbsValue() : getAbsValue();
 }
 
+/*!
+     @brief  get the value of the measurement as double 
+     @details the value of the measurement as a double. The value is referred to the unit returned by getUnitString(), 
+     not the unit displayed by the voltmeter on the front panel.
+     
+     For example, if the display shows -200.000 mV, the value would be -0.200000 since the unit is DC Volt (DCV).
+     Note that on AVR a double has the same precision of  a float, which is barely adequate for this purpose
+     @return value of the measurement as double
+*/    
 double GeminiK197Control::K197measurement::getValueAsDouble() const {
     return double(getValue()) * range_power[range_baseline[byte0.unit]+ byte0.range];
 }
 
+/*!
+     @brief  get the value as a null terminated string
+     @details the value is always in exponential format, as used by the K197 IEEE-488 card. 
+     The value is referred to the unit returned by getUnitString(), 
+     not the unit displayed by the voltmeter on the front panel.
+     For example, -2.00000E-1 when the front panel indicates 200.000 mV since the unit is DC Volt (DCV).
+     @param buffer a pointer to a char array. The array must have room for at least K197measurement::valueAsStringMinSize elements
+     @return value of the measurement as null terminated char array
+*/    
 char * GeminiK197Control::K197measurement::getValueAsString(char *buffer) const {
     char *tmpbuf = buffer;
     uint32_t uvalue = getAbsValue();
@@ -140,6 +189,14 @@ char * GeminiK197Control::K197measurement::getValueAsString(char *buffer) const 
     return buffer;
 }
 
+/*!
+     @brief  get the entire result as a null terminated string
+     @details the string has the same format as used by the K197 IEEE-488 card (without the data logger pointer).
+     For example, NDCV-2.00000E-1 indicates a normal measuremehnt (N), DC Volt (DCV), 2.00000E-1 Volt 
+     (the display on the front panel would show 200.000 mV) 
+     @param buffer a pointer to a char array. The array must have room for at least K197measurement::resultAsStringMinSize elements
+     @return value of the measurement as null terminated char array
+*/    
 char * GeminiK197Control::K197measurement::getResultAsString(char *buffer) const {
     char *tmpbuf = buffer;
     tmpbuf[0] = byte1.ovrange ? 'O' : isZero() ? 'Z' : 'N';
@@ -164,6 +221,15 @@ char * GeminiK197Control::K197measurement::getResultAsString(char *buffer) const
 //       Extended resolution functions
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+/*!
+     @brief  get the absolute value of the measurement as unsigned long integer, extending the resolution
+     @details the absolute value of the measurement is the displayed value, without sign, decimal point 
+     and with 2 more digits to extend the resolution
+     Extended Resolution (ER) functions give access to the full resolution available from the K197. 
+     Note that we do not make any claim to extend the accuracy of the measurement  
+     For example, if the display shows -200.000 mV, the absolute value ER would be 20000000 
+     @return value ER of the measurement as unsigned long integer
+*/    
 unsigned long GeminiK197Control::K197measurement::getAbsValueER() const {
     uint64_t uuvalue = getCount();
     uuvalue = uuvalue * 78125;  // multiply first to avoid losing accuracy. This is why we need a 64 bit integer...
@@ -171,14 +237,50 @@ unsigned long GeminiK197Control::K197measurement::getAbsValueER() const {
     return uuvalue;
 }
 
+/*!
+     @brief  get the  value of the measurement as long integer, extending the resolution
+     @details the value of the measurement is the displayed value, without decimal point 
+     and with 2 more digits to extend the resolution
+     Extended Resolution (ER) functions give access to the full resolution available from the K197. 
+     Note that we do not make any claim to extend the accuracy of the measurement  
+     For example, if the display shows -200.000 mV, the  value ER would be -20000000 
+     @return value ER of the measurement as a long integer
+*/    
 long GeminiK197Control::K197measurement::getValueER() const {
     return byte1.negative ? -getAbsValueER() : getAbsValueER();
 }
 
+/*!
+     @brief  get the value of the measurement as double ER (not recommended for AVR)
+     @details the value of the measurement as a double, extending the resolution. 
+     Extended Resolution (ER) functions give access to the full resolution available from the K197. 
+     Note that we do not make any claim to extend the accuracy of the measurement  
+    
+     The value is referred to the unit returned by getUnitString(), 
+     not the unit displayed by the voltmeter on the front panel.
+
+     For example, if the display shows -200.000 mV, the value would be -0.20000000 since the unit is DC Volt (DCV).
+     Note that on AVR a double has the same precision of  a float, which is NOT GOOD ENOUGH when extending the resolution. 
+     In other words, if you compare getValueER() with getValueAsDoubleER() they will have differences (getValueER() is correct) 
+     This function is provided in anticipation of a future extension to other microcontroller architecture supporting true double precision math
+     @return value ER of the measurement as double
+*/    
 double GeminiK197Control::K197measurement::getValueAsDoubleER() const {
     return double(getValueER()) * range_power[range_baseline[byte0.unit]+ byte0.range] * 0.01;  
 }
 
+/*!
+     @brief  get the value as a null terminated string and extending the resolution
+     @details the value is always in exponential format, as used by the K197 IEEE-488 card. 
+     Extended Resolution (ER) functions give access to the full resolution available from the K197. 
+     Note that we do not make any claim to extend the accuracy of the measurement  
+
+     The value is referred to the unit returned by getUnitString(), 
+     not the unit displayed by the voltmeter on the front panel.
+     For example, -2.0000000E-1 when the front panel indicates 200.000 mV since the unit is DC Volt (DCV).
+     @param buffer a pointer to a char array. The array must have room for at least K197measurement::valueAsStringMinSizeER elements
+     @return value ER of the measurement as null terminated char array
+*/    
 char *GeminiK197Control::K197measurement::getValueAsStringER(char *buffer) const {
     char *tmpbuf = buffer;
     uint32_t uvalue = getAbsValueER();
@@ -201,6 +303,14 @@ char *GeminiK197Control::K197measurement::getValueAsStringER(char *buffer) const
     return buffer;  
 }
  
+/*!
+     @brief  get the entire result as a null terminated string
+     @details the string has the same format as used by the K197 IEEE-488 card (without the data logger pointer) but with 2 additional digits.
+     For example, NDCV-2.0000000E-1 indicates a normal measuremehnt (N), DC Volt (DCV), 2.0000000E-1 Volt 
+     (the display on the front panel would show 200.000 mV) 
+     @param buffer a pointer to a char array. The array must have room for at least K197measurement::resultAsStringMinSizeER elements
+     @return value ER of the measurement as null terminated char array
+*/    
 char *GeminiK197Control::K197measurement::getResultAsStringER(char *buffer) const {
     char *tmpbuf = buffer;
     tmpbuf[0] = byte1.ovrange ? 'O' : isZero() ? 'Z' : 'N';
@@ -225,36 +335,75 @@ char *GeminiK197Control::K197measurement::getResultAsStringER(char *buffer) cons
 ******************             CONTROL STRUCTURE                  ************
 *****************************************************************************/
 
+/*!
+     @brief  set the range
+     @details set the range (see GeminiK197Control::K197range for possible values).
+     @param range the range to set
+*/    
 void GeminiK197Control::K197control::setRange(K197range range) {
     byte0.range = range;
     byte0.set_range = true;
 }
 
+/*!
+     @brief  select relative or absolute mode
+     @details set relative or absolute mode
+     @param isRelative true (default) set relative mode. False set absolute mode
+*/    
 void GeminiK197Control::K197control::setRelative(bool isRelative) {
     byte0.relative = isRelative;
     byte0.set_rel = true;
 }
 
+/*!
+     @brief  select dB mode
+     @details set decibel or Volt mode
+     @param is_dB true (default) set dB mode. False set Volt mode
+*/    
 void GeminiK197Control::K197control::setDbMode(bool is_dB) {
     byte0.dB = is_dB;
     byte0.set_db = true;
 }
 
+/*!
+     @brief  set the trigger mode
+     @details set the trigger mode (see GeminiK197Control::K197triggerMode for possible values).
+     @param range the trigger mode
+*/    
 void GeminiK197Control::K197control::setTriggerMode(K197triggerMode triggerMode) {
     byte1.trigger = triggerMode;
     byte1.set_trigger = true;
 }
 
+/*!
+     @brief  select remote or local mode
+     @details set remote or local mode
+     @param isRemote true (default) set remote mode. False set local mode
+*/    
 void GeminiK197Control::K197control::setRemoteMode(bool isRemote) {
   byte1.ctrl_mode = isRemote;
   byte1.set_ctrl_mode = true;  
 }
 
+/*!
+     @brief  select stored or displayed reading
+     @details set stored reading or displayed reading mode
+     @param sendStored true (default) set stored reading mode. False set displayed reading mode
+*/    
 void GeminiK197Control::K197control::setSendStoredReadings(bool sendStored) {
   byte2.sent_readings = sendStored;
   byte2.set_sent_readings = true;  
 }
 
+/*!
+     @brief  simulate startup handshake from a real 488 card
+     @details this function will wait for a startup pulse from the K197 and then 
+     try to simulate the startup handshake observed with a real 488 card
+     In the limited tests done (only one instruiment tested), it is not required. 
+     It is provided in case it may be required (e.g. due to different firmware revision)
+     @param timeout_micros how much to wait for the startup pulse from K197 (timeout_micros=0 means wait forever)
+     @return true if the handshake was succesful, false otherwise
+*/    
 bool GeminiK197Control::serverStartup(unsigned long timeout_micros) {
     if (timeout_micros!=0) {
         if (!waitInputEdge(timeout_micros)) {

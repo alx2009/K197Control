@@ -239,10 +239,11 @@ public:
     /*!
         @brief  Define the trigger mode. 
         @details we define a named value for each of the trigger mode mentioned in the 
-        nstruction manual for the K197 IEEE-488
+        instruction manual for the K197 IEEE-488
         However, there is no difference between TALK and GET on the internal interface. 
         See the instruction manual for the K197 IEEE-488 for more information
-        In addition, we define other constants that are used 
+        In addition, we define other constants that are used to actually trigger the measure 
+        (corresponding to TALK/GET bus commands)
     */
     enum K197triggerMode {
         invalid_000    = 0b000, ///< not used
