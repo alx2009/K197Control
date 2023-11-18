@@ -108,10 +108,6 @@ Here's an example of how a measurement result is encoded and transmitted within 
 | 3         | 1             | B2            |
 | 4         | 1             | B3            |
 
-## Notes
-
-- The order of transmission (MSB first or LSB first) should be consistent with the protocol's specification.
-- Ensure that your protocol defines a mechanism to indicate the beginning and end of measurement results if multiple measurements are sent sequentially.
 -----------------------------------------------------------------------------------
 # Measurement Result Data - B0 Encoding
 
