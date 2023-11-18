@@ -22,7 +22,7 @@ Once the library is installed, the example programs can be found in the Arduino 
 - The K197DataAcquisition example is similar to K197ControlDataLogger but in addition can send command to the voltmeter, including setting trigger mode and overriding the range.
 
 Limitations
-...........
+
 This is a very early release, which was developed contextually with the reverse engineering of the protocol. Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in futurtr revisions. I also expect that there are several bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
 
 Background information
@@ -89,7 +89,19 @@ For the coding of the bits please refer to the protocol specificvation [link to 
 
 Calculating the mesurement result
 ---------------------------------------------------
+The K197 does not send the decimal value in the desired unit directly to the IEEE board. Instead, it will send what appears to be a 21 bit raw count value, proportional but different from the displayed value (disregarding the decimal point):
 
+When the display show "000000", the raw count is also 0x0. When the display show "400000" which is the highest number possible (REL mode), the raw count would be 0x200000 or 2097152 decimal (this is an extrapolation, the highest value that can be sent is actually 0x1FFFFF).
+
+In principle any value x in between can be calculated with the formula x = raw_count * 400000 / 2097152. In practice care should be taken that the formula does npot result in a loss of precision, in particular when integer or single point math must be used (as is the case with the AVR).
+
+The decimal point can be inferred from the range (which is provided as an integer from 1 to 7). The sign is included in a separate bit.
+
+The library includes a numkber of functions to access the value as different formats. This includes a logarithmic format with separate integers for characteristic and mantissa. It is also possible to access the value as a double, albeit on the AVR this is the same as float and has just enough precision to hold the measurement value.
+
+The careful reader will notice that the raw count has a higher resolution than what the voltmeter is displaying. The interesting part is that this value is changing in a way that suggests the voltmeter is measufing with a higher resolution than what is displayed. In order to investigate this, the library implements a set of "Extended Resolution" functions that can provide a value with 2 additional significant digits. 
+
+Does this mean that now we have a 7 1/2 digit voltmeter? No, most definitely no. The voltmeter is almost certainly not designed to have the precision required for more than 220000 counts. In particular the voltage reference is not good enough, and there may be other limiting factors (e.g. noise level). And yet, while the additional counts are not available over the IEEE488 card, they are used by the analog output option when configured in the X1000 mode. The IEEE488 manual states explicitly that the X1000 mode extends the resolution of the Model 197 beyond the 5 1/2 digits of the display. It goes on claiming that the extra resolution allows for a more continuos output when high resolution is required. This suggests that there could be cases where having an extended resolution could be beneficial.   
 
 
 
