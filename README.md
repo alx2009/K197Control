@@ -23,7 +23,7 @@ Once the library is installed, the example programs can be found in the Arduino 
 
 Limitations
 
-This is a very early release, which was developed contextually with the reverse engineering of the protocol. Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in futurtr revisions. I also expect that there are several bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
+This is a very early release, developed at the same time the protocl was reverse engineered. Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in futurtr revisions. I also expect that there are several bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
 
 Background information
 ----------------------
@@ -86,6 +86,10 @@ In both cases, the K197 will monitor the first bit sent by the K197 card.
 - If the first bit is one, it will understand that the K197 board has commands to send and it. In such a case, the K197 will send a larger frame (possibly empty), so that the IEE board can send the command back in the acknowledge bit.
 
 For the coding of the bits please refer to the protocol specificvation [link to be provided]
+
+Limitations
+
+Not all aspects and fields have been reverse engineered at this point. In particular, calibration is missing completely and retrieving stored data is not working.  
 
 Calculating the mesurement result
 ---------------------------------------------------
