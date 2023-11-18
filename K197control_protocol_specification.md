@@ -68,7 +68,7 @@ Here's an example of a frame structure with a synchronization sequence:
 - Make sure to adjust the frame and sub-frame structure according to the specific needs of your protocol.
 
 --------------------------------------------------------------------------------
-# Sending Measurement Results
+# K197 control protocol - Sending Measurement Results
 
 Description: This section outlines how measurement results are encoded and transmitted using the protocol. Each measurement consists of 4 bytes, where each byte contains data from bit7 (MSB) to bit0 (LSB).
 
