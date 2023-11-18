@@ -63,9 +63,9 @@ Here's an example of a frame structure with a synchronization sequence:
 
 ## Notes
 
-- The use of synchronization sequences can vary depending on the protocol's requirements.
+- For generic use (anything other than contro0lling the K197 voltmeter), the use of synchronization sequences can vary depending on the application requirements.
 - t_frame is a timeout value that determines when a new frame starts if no bits are sent within it.
-- Make sure to adjust the frame and sub-frame structure according to the specific needs of your protocol.
+- Make sure to adjust the frame and sub-frame structure according to the specific needs of your application.
 
 --------------------------------------------------------------------------------
 # K197 control protocol - Sending Measurement Results
