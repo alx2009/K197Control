@@ -11,7 +11,7 @@ Background information
 ----------------------
 Releasing this sketch was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
 
-In the discussion, some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (there is a 6 pin connector used by an optional 4888 board in the voltmeter). 
+In the discussion, some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (inside the voltmeter there is a 6 pin connector used by an optional IEEE488 interface board). 
 Using the IEEE interface instead of the display interface offers more possibilities to control the voltmeter, for example it is possible to select the range bypassing the front panel switches (only for volt and Ampere modes, it is also not posible to change modes or switch between Ac and DC Volts). With the help of some forum members, I managed to reverse engineer the protocol used. This library and the associated examples implement this protocol.
 
 The protocol used by the K197 to communicate with the IEEE board uses two wires, one for each direction. As far as I know it is a unique protocol (at least, I never encountered it before). If you know of other applications using a similar protocol please comment in one of the forum threads linked above.
