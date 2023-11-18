@@ -7,6 +7,8 @@ At the moment the library only supports Arduino Uno and other boards with a comp
 
 DISCLAIMER: Please note that the purpose of this repository is educational. Any use of the information for any other purpose is under own responsibility.
 
+Furthermore, this library has been tested with only one card and voltmeter. It may or may not work elsewhere, e.g. due to different firmware revisions of the card or the voltmeter. 
+
 Background information
 ----------------------
 Releasing this sketch was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
@@ -25,12 +27,23 @@ The K197 voltmener was designed at the time where hardware support for serial co
 
 In fact, the two laower layers (gemini and gemini frame) could be useful even with modern micros when running out of serial ports.
 
-The gemini and gemini frame protocols in a nutshell
+The gemini protocols in a nutshell
 ---------------------------------------------------
 
-In the following, let's be general and call the two peers Bob and Alice. Bob and Alice will keep their output pins LOW, while monitoring for a positive edge on their input pins. When Bob wants to send a bit to Alice, it will first set the outup pin high, then it will set the output pin according to the bit value and wait for an acknowledgement from Alice.
+In the following, let's be general and call the two peers Bob and Alice. Bob and Alice will keep their output pins LOW, while monitoring for a positive edge on their input pins. When Bob wants to send a bit to Alice, it will first set the outup pin high, then it will set the output pin according to the bit value and wait for an acknowledgement from Alice (up to a maximum time, then it will time-out).
 
 When Alice detects a positive edge, it will wait for a predetermined setup time and then read the value of the input pin. As soon as she has got the bit value, it will acknowledge generating a positive edge on its own output pin.  
 
-The genius in this protocol is that the acknowledgment can also be used to send a bit in the opposite direction. Immediately after Alice sets the output pin high to ackbnowledge the reception, she has two choices: if she does not have any data to send, it will return the output pin to the idle state (LOW).
+The genius in this protocol is that the acknowledgment can also be used to send a bit in the opposite direction. Immediately after Alice sets the output pin high to ackbnowledge the reception, she has two choices: if she does not have any data to send, it will return the output pin to the idle state (LOW). If she has data to send, she will set the output pin according to the bit value and wait for an acknowledgement from Bob (which is also including a bit to alice and so forth).
+
+But wait a minute, doesn't this result in an endless sequence of transmissions? Indeed, my first attempts of aping the protocol resulted in never ending back and forth transmission... the way it works is that the first one that initiates the communication always expects an acknowledgment but once the last bit is sent, it will not acknowledge the last bit received (if for some reason the peer was still sending data, it will time-out).
+
+When a timout is detected, the higher layer (gemini frame) is informed.
+
+The gemini frame protocols
+---------------------------------------------------
+The gemini frame protocol packs 
+
+
+
 
