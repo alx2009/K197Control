@@ -324,7 +324,7 @@ To calculate the measurement value from Bytes B0 to B3, follow these steps:
 
 4. Combine the 16-bit Display Count value from Bytes B2 and B3. These bytes contain the least significant bits of the Display Count.
 
-5. The Display Count represents a 21-bit binary number that encodes an unsigned long integer within the range 0 to 2,097,152 (0 to 400,000 in the voltmeter's display).
+5. The Display Count represents a 21-bit binary number that encodes an unsigned long integer within the range 0 to 2,097,152 (corresponding to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point).
 
 6. Apply the measurement unit to the Display Count value based on the unit extracted in step 1. This gives you the raw measurement value.
 
