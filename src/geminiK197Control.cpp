@@ -214,7 +214,7 @@ char *GeminiK197Control::K197measurement::getValueAsString(char *buffer) const {
   tmpbuf[0] = '.';
   tmpbuf++;
   // print leading zeros
-  for (uint32_t zlim = 10000; zlim > 10; zlim /= 10) {
+  for (uint32_t zlim = 10000; zlim >= 10; zlim /= 10) {
     if (uvalue < zlim) {
       tmpbuf[0] = ('0');
       tmpbuf++;
@@ -347,7 +347,7 @@ GeminiK197Control::K197measurement::getValueAsStringER(char *buffer) const {
   tmpbuf[0] = '.';
   tmpbuf++;
   // print leading zeros
-  for (uint32_t zlim = 1000000; zlim > 10; zlim /= 10) {
+  for (uint32_t zlim = 1000000; zlim >= 10; zlim /= 10) {
     if (uvalue < zlim) {
       tmpbuf[0] = ('0');
       tmpbuf++;

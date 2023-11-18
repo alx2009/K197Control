@@ -444,6 +444,10 @@ private:
 
 protected:
   using GeminiProtocol::begin;
+
+public:
+  // in the current implementation, we re-use the protected base class function making it public
+  using GeminiProtocol::isFrameEndDetected; 
 };
 
 #endif // K197CTRL_GEMINI_FRAME_H

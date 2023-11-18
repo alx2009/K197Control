@@ -20,8 +20,6 @@
   received) A frame boundary is detected when no data is received for a frame
   timeout period.
 
-  TODO: make sure if it is ok to run GeminiFrame without an inputBuffer set...
-
 */
 #include <boolFifo.h>
 #include <gemini.h>
@@ -33,24 +31,27 @@
 ////////////////////////////////////////////////////////////////////////////////////
 // Predefined command sequences
 ////////////////////////////////////////////////////////////////////////////////////
-uint8_t cmd_0[] = {0x00, 0x00, 0x00, 0x00, 0x00}; // empty command
-uint8_t cmd_1[] = {0x00, 0x02, 0x80, 0x00, 0x00}; // B0 command
-uint8_t cmd_2[] = {0x00, 0x00, 0xa0, 0x00, 0x00}; // B1 command
+uint8_t cmd_0[] = {0x00, 0x00, 0x00, 0x00, 0x00}; ///< empty command
+uint8_t cmd_1[] = {0x00, 0x02, 0x80, 0x00, 0x00}; ///< B0 command
+uint8_t cmd_2[] = {0x00, 0x00, 0xa0, 0x00, 0x00}; ///< B1 command
 uint8_t cmd_3[] = {0x00, 0x00, 0x80, 0x00,
-                   0x00}; // unknown command to try no. 1
+                   0x00}; ///< unknown command to try no. 1
 uint8_t cmd_4[] = {0x00, 0x40, 0x00, 0x00,
-                   0x00}; // unknown command to try no. 2
+                   0x00}; ///< unknown command to try no. 2
 uint8_t cmd_5[] = {0x00, 0x50, 0x00, 0x00,
-                   0x00}; // unknown command to try no. 3
-uint8_t *cmd[] = {cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5};
+                   0x00}; ///< unknown command to try no. 3
+uint8_t *cmd[] = {cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5}; ///< consolidate all pre-defined commands in one array of pointers
 
-const size_t cmd_size = sizeof(cmd_0) / sizeof(cmd_0[0]);
+// the next instruction is a fancy way to set cmd_size = 5
+const size_t cmd_size = sizeof(cmd_0) / sizeof(cmd_0[0]); ///< size of a pre-defined command
 
-GeminiFrame gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170,
-                   90); // in, out, read pulse, write pulse, (not used), read
-                        // delay, write delay
-bool logOnce = false;
-bool logAlways = true;
+GeminiFrame 
+    gemini(INPUT_PIN, OUTPUT_PIN, 10, 80, 170,
+           90); ///< handle the interface to the K197 using the Gemini Framing Protocol
+                // in, out, write pulse, (not used), read delay, write delay
+
+bool logOnce = false;  ///< flag, will log the next frame when set
+bool logAlways = true; ///< flag, will log all frames when set
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Management of the serial user interface
@@ -96,6 +97,14 @@ void printError(const char *buf) {
   printHelp();
 }
 
+/*!
+      @brief execute a command sending the corresponding pre-defined control frame to the K197
+      @details note that if there is another command waiting transmission, the two will be
+      send back-to-back in the same frame. This is intentional to be able
+      to test what happens sending more than one control sequence in the same frame.
+      Normally the user should wait until a new measurement is displayed 
+      on the serial terminal before sending a new command
+*/
 void executeCommand(uint8_t cmd_index) {
   gemini.sendFrame(cmd[cmd_index], cmd_size);
   Serial.print(F("CMD no. "));
@@ -104,7 +113,7 @@ void executeCommand(uint8_t cmd_index) {
 }
 
 /*!
-      @brief check if a comand causes data to be sent via gemini object
+      @brief check if a command causes data to be sent via gemini object
 */
 bool isTXCommand(char c) { return (c >= '0') && (c <= '5') ? true : false; }
 

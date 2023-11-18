@@ -29,14 +29,21 @@
 #define INPUT_PIN 2
 #define OUTPUT_PIN 3
 
-GeminiFrame gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170,
-                   90); // in, out, read pulse, write pulse, (not used), read
-                        // delay, write delay
-uint8_t inputFrame[4];
+GeminiFrame 
+    gemini(INPUT_PIN, OUTPUT_PIN, 10, 80, 170,
+           90); ///< handle the interface to the K197 using the Gemini Protocol
+                // in, out, write pulse, (not used), read delay, write delay
 
+uint8_t inputFrame[4]; ///< buffer for a complete K197 measurement frame (4 bytes) 
+
+/*!
+      @brief Arduino setup function
+      @details setup the Serial port and the gemini object
+*/
 void setup() {
-  // if all alternative print statements are enabled, a higher baud rate may be
-  // needed Serial.begin(500000);
+  // if all alternative print statements are enabled, 
+  // a higher baud rate may be needed 
+  // Serial.begin(500000);
   Serial.begin(115200);
   delay(1000);
   Serial.println(F("K197ControlDataLogger"));
@@ -48,16 +55,26 @@ void setup() {
 
   // the following line is normally not needed
   // gemini.serverStartup(2000000);
-  gemini.setInitiatorMode(false);
+  
+  // the following is only required if we need to control the K197, but doesn't hurt to have it
+  gemini.setInitiatorMode(false);  
 }
 
-unsigned long lastTimeMicros = 0L;
-bool dataPrinted = false;
-
+/*!
+      @brief Arduino setup function
+      @details call update() to handle the gemini framing protocol and communicate with the K197. 
+      When a new frame has been received, cast it to a GeminiK197Control::K197measurementand in order to print the measurement result
+*/
 void loop() {
-  gemini.update();
-  if (gemini.frameComplete()) {
-    uint8_t *pframe = gemini.getFrame();
+  gemini.update();  // call update() as frequently as possible
+  if (gemini.frameComplete()) { // if true we have got a new frame
+    uint8_t *pframe = gemini.getFrame(); // get a pointer to the frame buffer and allow a new frame to be received
+
+    // We now have the data in pframe. No data will be over-written until we call update() again
+    // How much time do we have to process the data?
+    // The gemini protocol is fairly resilient to delays, however it has a limit
+    // if the processing takes too much time before calling update(), the k197 may timout
+    // and may skip a measurement as a result  
 
     // Uncomment to print the received frame buffer
     // uint8_t frame_len=gemini.getFrameLenght();
@@ -65,6 +82,8 @@ void loop() {
     //   Serial.print(pframe[i], BIN); Serial.print(' ');
     //}
 
+    // we now cast the generic frame pointer to a K197measurement object,
+    // allowing easy access to the information
     GeminiK197Control::K197measurement *pmeasurement =
         (GeminiK197Control::K197measurement *)pframe;
 
@@ -73,7 +92,7 @@ void loop() {
     // Serial.print(F(" B0=")); Serial.print(pmeasurement->byte0.byte0, BIN);
     // Serial.print(F(": unit=")); Serial.print(pmeasurement->byte0.unit);
     // Serial.print(F(": AC/DC=")); Serial.print(pmeasurement->byte0.ac_dc);
-    // Serial.print(F(", undef0="));
+    // Serial.print(F(", undef0=")); Serial.print(pmeasurement->byte0.undefined);
     // Serial.print(pmeasurement->byte0.undefined); Serial.print(F(", rel="));
     // Serial.print(pmeasurement->byte0.relative); Serial.print(F(", range="));
     // Serial.print(pmeasurement->byte0.range); Serial.print(F(", OV="));
@@ -87,12 +106,15 @@ void loop() {
     // getValueAsDouble()=")); Serial.print(pmeasurement->getValueAsDouble(),
     // 9);
 
-    char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
+    char buffer[GeminiK197Control::K197measurement::resultAsStringMinSize];
     Serial.println(pmeasurement->getResultAsString(buffer));
 
-    // For enhanced resolution replace the above statemept with the following:
+    // For enhanced resolution replace the above statements with the following:
+    //char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeER];
     // Serial.println(pmeasurement->getResultAsStringER(buffer));
   }
+
+  // This is how we can check for timeouts. 
   if (gemini.frameTimeoutDetected()) {
     Serial.print(gemini.getFrameTimeoutCounter());
     Serial.println(F(" frame timeouts!"));

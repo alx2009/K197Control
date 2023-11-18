@@ -25,14 +25,16 @@
 #include <geminiFrame.h>
 #include <geminiK197Control.h>
 
-#define INPUT_PIN 2
-#define OUTPUT_PIN 3
+#define INPUT_PIN 2  ///< input pin (MUST support edge interrupts)
+#define OUTPUT_PIN 3 ///< output pin (any I/O pin can be used)
 
-GeminiK197Control gemini(INPUT_PIN, OUTPUT_PIN, 15, 10, 80, 170,
-                         90); // in, out, read pulse, write pulse, (not used),
-                              // read delay, write delay
-bool logOnce = false;
-bool logAlways = true;
+GeminiK197Control
+    gemini(INPUT_PIN, OUTPUT_PIN, 10, 80, 170,
+           90); ///< handle the interface to the K197 using the Gemini Protocol
+                // in, out, write pulse, (not used), read delay, write delay
+
+bool logOnce = false;   ///< flag, will log the next measurement when set
+bool logAlways = true; ///< flag, will log all measurements when set
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Management of the serial user interface
@@ -81,9 +83,24 @@ void printError(const char *buf) {
   printHelp();
 }
 
+/*!
+      @brief check the argument of a command
+      @param min lowest character allowed for the argument
+      @param max highest character allowed for the argument
+      @param c the character to check
+      @return true if min <= c <= max
+*/
 bool checkInput(char min, char max, char c) {
   return (c >= min) && (c <= max) ? true : false;
 }
+
+/*!
+      @brief convert a character to its value
+      @details representing a digit into its value as a digit
+      For example, '0' is converted to 0, '1' to 1, etc.
+      @param c the character to convert
+      @return the value that the character c represents 
+*/
 uint8_t getInputValue(char c) { return c - '0'; }
 void rangeError(char command, char parameter) {
   Serial.print(command);
@@ -91,6 +108,9 @@ void rangeError(char command, char parameter) {
   Serial.println(F(": out of range"));
 }
 
+/*!
+      @brief macro used to check the range within a function implementing a command
+*/
 #define PREVENT_RANGE_ERROR(command, min, max, c)                              \
   {                                                                            \
     if (!checkInput(min, max, c)) {                                            \
@@ -99,12 +119,24 @@ void rangeError(char command, char parameter) {
     }                                                                          \
   }
 
+/*!
+      @brief set the unit to dB or Volt
+      @details Note that this function only store the command in the output buffer. 
+      this has no effect until the buffer is sent to the K197 calling executeCommand()
+      @param c '0' set Volt, '1' set dB
+*/
 void setDecibel(char c) {
   PREVENT_RANGE_ERROR('D', '0', '1', c);
   Serial.print(F("Db="));
   Serial.println(getInputValue(c));
   gemini.getControlBuffer()->setDbMode(getInputValue(c));
 }
+/*!
+      @brief set the range
+      @details Note that this function only store the command in the output buffer. 
+      this has no effect until the buffer is sent to the K197 calling executeCommand()
+      @param c '0' range ('0 to '5' allowed)
+*/
 void setRange(char c) {
   PREVENT_RANGE_ERROR('R', '0', '5', c);
   Serial.print(F("Range="));
@@ -112,12 +144,24 @@ void setRange(char c) {
   gemini.getControlBuffer()->setRange(
       (GeminiK197Control::K197range)getInputValue(c));
 }
+/*!
+      @brief set relative or absolute mode
+      @details Note that this function only store the command in the output buffer. 
+      this has no effect until the buffer is sent to the K197 calling executeCommand()
+      @param c '0' set absolute mode, '1' set relative mode
+*/
 void setRelative(char c) {
   PREVENT_RANGE_ERROR('Z', '0', '1', c);
   Serial.print(F("Relative="));
   Serial.println(getInputValue(c));
   gemini.getControlBuffer()->setRelative(getInputValue(c));
 }
+/*!
+      @brief set the trigger mode
+      @details Note that this function only store the command in the output buffer. 
+      this has no effect until the buffer is sent to the K197 calling executeCommand()
+      @param c '0' trigger mode ('0 to '5' allowed)
+*/
 void setTriggerMode(char c) {
   PREVENT_RANGE_ERROR('T', '0', '5', c);
   Serial.print(F("Trigger="));
@@ -125,12 +169,24 @@ void setTriggerMode(char c) {
   gemini.getControlBuffer()->setTriggerMode(
       (GeminiK197Control::K197triggerMode)getInputValue(c));
 }
+/*!
+      @brief  set stored or displayed reading mode
+      @details Note that this function only store the command in the output buffer. 
+      this has no effect until the buffer is sent to the K197 calling executeCommand()
+      @param c '0' set displayed reading mode, '1' set stored reading mode
+*/
 void setReadings(char c) {
   PREVENT_RANGE_ERROR('B', '0', '1', c);
   Serial.print(F("Readings="));
   Serial.println(getInputValue(c));
   gemini.getControlBuffer()->setSendStoredReadings(getInputValue(c));
 }
+
+/*!
+      @brief  execute all the commands in the buffer
+      @details this function mark the buffer for transmision to the K197, 
+      executing all the commands stored in the buffer
+*/
 void executeCommand() {
   Serial.println(F("execute"));
   gemini.execute();
@@ -227,11 +283,16 @@ void setup() {
 
   // the following line is normally not needed
   // gemini.serverStartup(2000000);
-  gemini.setInitiatorMode(false);
+
+  // The K197 must be the one initiating the communication,
+  // so the following line is essential
+  gemini.setInitiatorMode(false); 
 }
 
 /*!
       @brief Arduino loop function
+      @details handle serial port communication and then call update to handle the K197 control protocol. 
+      When a complete frame has been received retrieves the measurement buffer and print the measurement result.
 */
 void loop() {
   if (Serial.available()) {
@@ -266,7 +327,7 @@ void loop() {
       // Serial.print(F(", getValueAsDouble()="));
       // Serial.print(pmeasurement->getValueAsDouble(), 9);
 
-      char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeEP];
+      char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeER];
       Serial.println(pmeasurement->getResultAsString(buffer));
 
       // For enhanced resolution replace the above statement with the following:
