@@ -1,4 +1,16 @@
-# Framing Layer
+# Gemini protocol Layer
+Description: The framing layer divides the continuous bitstream into frames and sub-frames to facilitate data transmission. Frames may contain optional synchronization sequences to aid in frame detection.
+
+## how the gemini protocol works
+The gemini layer is responsible for exchanging bits between two peers. Normally one peer is configured to initiate the communication and is the one controlling when the communication starts and ends. 
+
+When the initiator want to send a bit to the other side, it will set the outup pin high, then set it according to the bit value and wait for an acknowledgement ((up to a maximum time, then it will time-out)). When the other peer detects a positive edge, it will wait for a predetermined setup time, read the value of the input pin and acknowledge generating a positive edge on its own output pin. The acknowledgment is also used to send a bit in the opposite direction in the same way.
+
+When sending a 0 bit, a short pulse is generated on the output pin. The duration of the pulse should be significantly shorter than the setup time, otherwise it could be misunderstood for a 1 level. However it should be long enough to be detected by the other peer (for the K197, it should be at least 1 microsecond long to be detected reliably).
+
+The K197 is always the initiator.
+
+# Gemini Frame Layer
 
 Description: The framing layer divides the continuous bitstream into frames and sub-frames to facilitate data transmission. Frames may contain optional synchronization sequences to aid in frame detection.
 
@@ -9,8 +21,13 @@ A frame consists of the following components:
 | Component                   | Description                                          |
 |-----------------------------|------------------------------------------------------|
 | Synchronization Sequence    | Optional, composed of zero bits (0x00)              |
-| Sub-Frames                  | Contains data and start bit (described below)       |
-| Timeout (t_frame)           | Duration after which a new frame begins if no data is sent within it |
+| Sub-Frames                  | Optional, contains data and start bit (described below)       |
+| Synchronization Sequence    | Optional, composed of zero bits (0x00)              |
+
+All components are optional, but obviously at least one component must be present for a frame to exist
+
+Timeout (t_frame): if no data is sent within a t_frame time interval (frame timout), the next bit will be considered as the start of a new frame
+
 
 ## Sub-Frame Structure
 
@@ -24,7 +41,9 @@ A sub-frame contains the following components:
 ## Frame Synchronization
 
 - The synchronization sequence (if used) consists of zero bits and is placed at the beginning of the frame.
-- Its purpose is to aid in frame detection and synchronization.
+- Its purpose is to aid in frame detection and synchronization. It is also used when the number of sub-frames in the two directions are different, due to the fact that the number of bits sent in each direction must be the same (for each bit sent in one direction there is a corrresponding bit sent in the opposite direction). 
+
+The K197 add a synchronization sequence at the beginning of the communication, the IEEE488 card may add synchronization sequences at the end of the communication 
 
 ## Data Encoding in Sub-Frames
 
@@ -110,7 +129,7 @@ Byte B0 is structured as follows:
   - 00: Volt
   - 10: Ampere
   - 01: Ohm
-  - Others: Reserved for future use
+  - 11: Decibel (dB)
 
 - Bit 5 (AC/DC) represents the AC/DC nature of the measurement:
   - 0: DC (Direct Current)
@@ -156,7 +175,6 @@ In this example:
 ## Notes
 
 - Undefined bits should be ignored (seems to be always set to 1).
-- Follow your protocol's specifications consistently when encoding and decoding Byte B0.
 
 # Measurement Result Data - B1 Encoding
 
@@ -320,7 +338,7 @@ To calculate the measurement value from Bytes B0 to B3, follow these steps:
 
 ## Resolution Note
 
-Please note that the Display Count provides slightly better resolution compared to what is displayed by the voltmeter. However, the extra resolution is not significant because it is smaller than the measurement error according to the voltmeter's specifications.
+Please note that the Display Count provides slightly better resolution compared to what is displayed by the voltmeter. However, the extra resolution is not significant because it is smaller than the measurement error according to the voltmeter's specifications (more experimentation is needed to understand if there are special cases where the extra resolution could be significant).
 
 ## Example
 
