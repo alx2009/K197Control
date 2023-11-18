@@ -101,7 +101,7 @@ In principle any value x in between can be calculated with the formula x = raw_c
 
 The decimal point can be inferred from the range (which is provided as an integer from 1 to 7). The sign is included in a separate bit.
 
-The library includes a numkber of functions to access the value as different formats. This includes a logarithmic format with separate integers for characteristic and mantissa. It is also possible to access the value as a double, albeit on the AVR this is the same as float and has just enough precision to hold the measurement value.
+The library includes a number of functions to access the value as different formats. This includes a logarithmic format with separate integers for characteristic and mantissa. It is also possible to access the value as a double, albeit on the AVR this is the same as float and has just enough precision to hold the measurement value.
 
 The careful reader will notice that the raw count has a higher resolution than what the voltmeter is displaying. The interesting part is that this value is changing in a way that suggests the voltmeter is measufing with a higher resolution than what is displayed. In order to investigate this, the library implements a set of "Extended Resolution" functions that can provide a value with 2 additional significant digits. 
 
