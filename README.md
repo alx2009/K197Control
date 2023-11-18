@@ -84,7 +84,7 @@ In both cases, the K197 will monitor the first bit sent by the K197 card.
 - If the first bit received is zero, it will interprete it as if the IEEE488 board does not have any data to send. If  the K197 doesn't have a new measurement to send (e-g- depending on the trigger mode) the frame will only include one synchronization bit and no data.
 - If the first bit is one, it will understand that the K197 board has commands to send to the K197, and the first bit is the start bit of the first sub-frame. In such a case, the K197 will send a larger frame (possibly empty), so that the IEEE board can send the entire command back to the K197.
 
-For the coding of the bits please refer to the protocol specificvation [link to be provided]
+For the coding of the bits please refer to the protocol specificvation [K197control_protocol_specification.md]
 
 Limitations
 
