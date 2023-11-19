@@ -11,7 +11,7 @@ Furthermore, this library has been tested with only one card (mod. 1972A) and on
 
 Installation and use
 ----------------------
-Please note the dislcaimer above. These instructions explain how to download the library and compile under the Arduino IDE. Any other use is your own responsibility.
+Please note the disclaimer above. These instructions explain how to download the library and compile under the Arduino IDE. Any other use is your own responsibility.
 
 From the GitHub repository (https://github.com/alx2009/K197Control), select the "Releases", decide what release you want (the latest one usually) and download the .zip file with the source code for that release. Then follow the instructions on how to import a .zip library here: https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries#importing-a-zip-library
 
