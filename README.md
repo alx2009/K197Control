@@ -80,11 +80,11 @@ In both cases, the K197 will monitor the first bit sent by the K197 card.
 
 For the coding of the bits please refer to the protocol specification (https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md)
 
-Limitations
+### Limitations
 
 Not all aspects and fields have been reverse engineered at this point. In particular, calibration is missing completely and retrieving stored data is not working.  
 
-###Calculating the mesurement result
+### Calculating the mesurement result
 The K197 send the measurement result as a 21 bit unsigned binary number, which appears toi be some sort of raw count value, proportional but different from the displayed value (disregarding the decimal point, sign, unit, etc.):
 
 When the display show "000000", the raw count is also 0x0. When the display show "400000" which is the highest number possible (REL mode), the raw count would be 0x200000 or 2097152 decimal (this is an extrapolation, the highest value that can be sent is actually 0x1FFFFF).
