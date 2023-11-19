@@ -1,5 +1,5 @@
 # K197Control
-This is an Arduino library that allows to control a K197 voltmeter with the same two wire protocol used by the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
+This is an Arduino library that allows to control a K197 voltmeter with the internal interface used by the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
 
 The lower layer protocol could also be used as a generic two wire communication protocol between two microcontrollers (only an input pin supporting edge interrupt + output pin is needed on each microcontroller). 
 
