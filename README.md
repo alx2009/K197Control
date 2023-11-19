@@ -7,7 +7,7 @@ At the moment the library only supports Arduino Uno and other boards with a comp
 
 DISCLAIMER: Please note that the purpose of this repository is educational. Any use of the information for any other purpose is under own responsibility.
 
-Furthermore, this library has been tested with only one card and one voltmeter. It may or may not work elsewhere, e.g. due to different firmware revisions of the card or the voltmeter. 
+Furthermore, this library has been tested with only one card (mod. 1972A) and one voltmeter (mod. 197A, SW revision level A01). It may or may not work elsewhere, e.g. due to different firmware revision. 
 
 Installation and use
 ----------------------
