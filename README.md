@@ -28,16 +28,16 @@ This is a very early release, developed at the same time the protocol was revers
 
 # Background information
 
-Releasing this sketch was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
+This library was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
 
-In the discussion, some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (inside the voltmeter there is a 6 pin connector used by an optional IEEE488 interface board). 
-Using the IEEE interface instead of the display interface offers more possibilities to control the voltmeter, for example it is possible to select the range bypassing the front panel switches (this is possible only for volt and Ampere modes, it is also not possible to change modes or switch between Ac and DC). With the help of a forum member who lended me a IEEE488 card, I managed to reverse engineer the protocol used. This library and the associated examples implement this protocol.
+Some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (inside the voltmeter there is a 6 pin connector used by an optional IEEE488 interface board). 
+Using the IEEE interface instead of the display interface offers more possibilities to control the voltmeter, for example it is possible to select the range bypassing the front panel switches (albeit this is possible only for volt and Ampere modes, it is also not possible to change modes or switch between Ac and DC). With the help of a forum member who lended me a IEEE488 card, I managed to reverse engineer the protocol used. This library and the associated examples implement this protocol.
 
 The protocol used by the K197 to communicate with the IEEE board uses two wires, one for each direction. As far as I know it is a unique protocol (at least, I never encountered it before). If you know of other applications using a similar protocol please comment in one of the forum threads linked above.
 
 To understand the protocol, it is useful to think of three layers (this is somewhat arbitrary but bear with me for now), which I dubbed gemini, gemini frame and K197 control respectively:
-- The gemini protocol is the lowest layer and is responsible to send arbitrary bit sequences on the wire
-- The gemini frame sits on top of gemini and is responsible for sending packing/unpacking byte sequences into frames which are sent/received using the lower layer
+- The gemini protocol is the lowest layer and is responsible to send bit sequences between two peers
+- The gemini frame sits on top of gemini and is responsible for  packing/unpacking byte sequences into frames which are sent/received using the lower layer
 - The K197 control protocol encodes commands (to the K197) or measurement results (from the K197) as byte sequences that are sent or received using the gemini frame protocol
 
 The above model is useful to understand the protocol and the library class hierarchy, obviously the original designers of the protocol might have had a completely different model in mind.
