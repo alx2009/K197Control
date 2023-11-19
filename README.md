@@ -10,7 +10,6 @@ At the moment the library only supports Arduino Uno and other boards with a comp
 Furthermore, this library has been tested with only one card (mod. 1972A) and one voltmeter (mod. 197A, SW revision level A01). It may or may not work elsewhere, e.g. due to different firmware revision. 
 
 # Installation and use
-----------------------
 Please note the disclaimer above. These instructions explain how to download the library and compile under the Arduino IDE. Any other use is your own responsibility.
 
 From the GitHub repository (https://github.com/alx2009/K197Control), select "Releases", decide what release you want (the latest one usually) and download the .zip file with the source code for that release. Then follow the instructions on how to import a .zip library here: https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries#importing-a-zip-library
@@ -26,7 +25,6 @@ Once the library is installed, the example programs can be found in the Arduino 
 This is a very early release, developed at the same time the protocol was reverse engineered. Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in future revisions. I also expect that there are many bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
 
 # Background information
-----------------------
 Releasing this sketch was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
 
 In the discussion, some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (inside the voltmeter there is a 6 pin connector used by an optional IEEE488 interface board). 
@@ -46,8 +44,6 @@ The K197 voltmeter was designed at the time where hardware support for serial co
 In fact, the two lower layers (gemini and gemini frame) could be useful even with modern micros when running out of serial ports.
 
 ## The gemini protocol in a nutshell
----------------------------------------------------
-
 Let's call Bob and Alice the two peers that are comunicating via gemini protocol. When nothing need to be transmitted, Bob and Alice will keep their output pins LOW, while monitoring for a positive edge on their input pins (idle state). When Bob wants to send a bit to Alice, he will set the outup pin high, then he will set it according to the bit value and wait for an acknowledgement from Alice (up to a maximum time, then it will time-out).
 
 When Alice detects a positive edge, she will wait for a predetermined setup time and then read the value of the input pin. As soon as she has got the bit value, she will acknowledge generating a positive edge on its own output pin.  
@@ -63,7 +59,6 @@ When sending a 0 bit, a short pulse is generated on the output pin. The duration
 The examples provided with the library replicate the timing observed with the IEEE card, but this can be changed. The pulse duration can be reduced to a few us without apparent issues. The setup time can also be reduced but this hasn't been tested with the K197, yet.
 
 ## The gemini frame protocol
----------------------------------------------------
 The gemini frame protocol packs and unpacks sequence of bytes in frames. A frame is composed of sub-frames and synchronization sequences. Each sub-frame is composed by 9 bits: a start bit (set to 1) and 8 data bits encoding a byte of data. Any consecutive 0 bits outside a sub-frame are synchronization sequences. Both the sub-frame rapresenting the bytes and the bits within a subframe are sent MSB first.
 
 In principle there are a number of ways to detect a frame boundary:
@@ -76,7 +71,6 @@ When sending a frame, if an acknowledgment timeout is detected by the lower laye
 It is also possible to send an empty frame (a frame consisted of a single synchronization sequence and no data). When the K197 is not measuring (e.g. due to the trigger mode) it will send empty frames to allow the IEE488 card to send commands in the opposite direction. 
 
 ## The K197 control protocol
----------------------------------------------------
 As anticipated, the K197 is always the initiator of the comunication. When it is triggered, it will attempt to send the measurement result encoded in a frame including an initial synchronization sequence of 16 '0' and the 4 sub-frames with 4 bytes of data. When the K197 is not triggered, it will still periodically "poll" the IEEE board sending an empty frame.
 
 In both cases, the K197 will monitor the first bit sent by the K197 card.
@@ -90,8 +84,7 @@ Limitations
 
 Not all aspects and fields have been reverse engineered at this point. In particular, calibration is missing completely and retrieving stored data is not working.  
 
-Calculating the mesurement result
----------------------------------------------------
+###Calculating the mesurement result
 The K197 send the measurement result as a 21 bit unsigned binary number, which appears toi be some sort of raw count value, proportional but different from the displayed value (disregarding the decimal point, sign, unit, etc.):
 
 When the display show "000000", the raw count is also 0x0. When the display show "400000" which is the highest number possible (REL mode), the raw count would be 0x200000 or 2097152 decimal (this is an extrapolation, the highest value that can be sent is actually 0x1FFFFF).
