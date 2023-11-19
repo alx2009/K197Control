@@ -17,8 +17,8 @@ From the GitHub repository (https://github.com/alx2009/K197Control), select "Rel
 
 Once the library is installed, the example programs can be found in the Arduino IDE under File > Examples > K197control
 
-- The K197Probe example demonstrate how to probe the interface at low level, displaying raw frame data.
-- The K197ControlDataLogger example demonstrate how to log measurements results to Serial (Add an Arduino mini and a blutooth module and suddently your voltmeter can log data via bluetooth)
+- The K197Probe example demonstrates how to probe the interface at low level, displaying raw frame data.
+- The K197ControlDataLogger example demonstrates how to log measurements results to Serial (Add an Arduino mini and a blutooth module and suddently your voltmeter can log data via bluetooth)
 - The K197DataAcquisition example is similar to K197ControlDataLogger but in addition can send command to the voltmeter, including setting trigger mode and overriding the range.
 
 Limitations
