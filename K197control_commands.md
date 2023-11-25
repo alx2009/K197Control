@@ -91,7 +91,7 @@ Here's an example of Byte B0 with various parameters set:
 
 In this example:
 - The dB mode is not changed.
-- Measurement will be absolute (if Relative mode waas set it is cleared).
+- Measurement will be absolute (if Relative mode was set it is cleared).
 - Set auto range.
 
 ## Notes
@@ -111,19 +111,19 @@ Byte B1 is structured as follows:
 
 | Bit 7 (Control mode) | Bit 6 (Undefined) | Bit 5 (Control mode) | Bit 4 (Undefined) | Bit 3-0 (trigger mode) |
 |----------------------|-------------------|----------------------|-------------------|------------------------|
-| Set Control flag     | Undefined         | Remote Indication    | Undefined         | Trigger Mode           |
+| Set Control flag     | Reserved          | Remote Indication    | Reserved          | Trigger Mode           |
 
 - Bit 7 is the Set Control flag:
   - 0: do not change the remote/local control indication
   - 1: Set the control indication according to the value of bit 5 (Control mode)
 
-- Bit 6 (Undefined) is undefined and should be set to 1.
+- Bit 6 (Reserved) is undefined and should be set to 1.
 
 - Bit 5 (control Mode) controls the remote/local indication on the front panel:
 - 0 : set local control mode (RMT indicator on the front panel is not shown)
 - 1 : set remote control mode (RMT indicator on the front panel is shown)
 
-- Bit 4 (Undefined) is undefined and should be set to 1.
+- Bit 4 (Reserved) is undefined and should be set to 1.
 
 ### Trigger Mode
 Bits 3-0 (Range) specify the trigger  mode. 
@@ -160,131 +160,29 @@ After this command is received, the Voltmeter will stop masuring. A single meaas
 
 Description: This section explains how Byte B2 of the command strcuture is encoded. B2 is used to control the source of the measurement (display or stored readings)
 
+## Byte B2 format
+
+| Bit 7 (Reading mode flag) | Bit 6 (Undefined) | Bit 5 (Reading mode) | Bit 4-0 (Undefined) |
+|---------------------------|-------------------|----------------------|---------------------|
+| Reading Mode flag         | Reserved          | Reading Source       | Reserved            |
+
+- Bit 7 is the Reading Mode flag:
+  - 0: Do not change the reading mode
+  - 1: Set the reading mode according to bit 5
+ 
+- Bit 6 (Reserved) is undefined and should be set to 0.
+
+- Bit 5 (Reading Mode) controlled the source of the readings sent by the K197:
+  - 0: The source is the measurement data displayed on the front panel 
+  - 1: Set source is the storede data (K197 data logger function)
+
+# Command Data - B3 Encoding
+
+Byute B3 is reserved and should always be set to 0
+
+# Command Data - B4 Encoding
+
+Byute B4 is reserved and should always be set to 0
 
 
 
-Description: This section explains how Bytes B2 and B3 of the measurement result encode the least significant bits of the display count.
-
-## Byte B2 and B3 Format
-
-Bytes B2 and B3 are structured as follows:
-
-### Byte B2:
-
-| Bit 7-0 (Display count LSB) |
-|-----------------------------|
-| Display count bits 8-15     |
-
-- Bits 7-0 (Display count LSB) represent bit 8-15 of the display count.
-
-### Byte B3:
-
-| Bit 7-0 (Display count LSB) |
-|-----------------------------|
-| Display count LSB           |
-
-- Bits 7-0 (Display count LSB) represent the 8 least significant bits of the display count.
-
-## Display count LSB
-
-Bytes B2 and B3 together represent the 16 least significant bits of the display count. They contain the least significant bits of the display count value.
-
-## Example
-
-Here's an example of Bytes B2 and B3 with display count LSB values:
-
-### Byte B2:
-
-| Bit 7-0 (Display count LSB) |
-|-----------------------------|
-| 11011010                    |
-
-### Byte B3:
-
-| Bit 7-0 (Display count LSB) |
-|-----------------------------|
-| 00101101                    |
-
-In this example, B2 and B3 together encode the 16 least significant bits of the display count.
-
-# Measurement Result Data - B0 to B3 Encoding and Value Calculation
-
-Description: This section explains how to obtain the measurement value from Bytes B0 to B3 of the measurement result.
-
-## Byte B0 to B3 Format
-
-Bytes B0 to B3 are structured as follows:
-
-### Byte B0:
-
-| Bit 7-6 (Unit) | Bit 5 (AC/DC) | Bit 4 (Undefined) | Bit 3 (Relative) | Bit 2-0 (Range) |
-|----------------|---------------|-------------------|------------------|----------------|
-| Unit           | AC/DC         | Undefined         | Relative         | Range          |
-
-### Byte B1:
-
-| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
-|--------------|-------------------|-------------------|-----------------------------|
-| Sign         | Undefined         | Overrange         | Display Count MSB           |
-
-### Byte B2:
-
-| Bit 7-0 (Display Count LSB) |
-|-----------------------------|
-| Display Count LSB           |
-
-### Byte B3:
-
-| Bit 7-0 (Display Count LSB) |
-|-----------------------------|
-| Display Count LSB (big endian)|
-
-## Procedure to Obtain Measurement Value
-
-To calculate the measurement value from Bytes B0 to B3, follow these steps:
-
-1. Extract the measurement unit from Byte B0 using bits 7 and 6. The unit is determined as follows:
-   - 00: Volt
-   - 10: Ampere
-   - 01: Ohm
-   - 11: dB
-
-2. Check Bit 5 of Byte B1 (Overrange flag). If it is set (1), an overrange condition is indicated.
-
-3. Extract the sign of the measurement from Bit 7 of Byte B1. If it is set (1), the measurement is negative; otherwise, it is positive.
-
-4. Combine the 16-bit Display Count value from Bytes B2 and B3. These bytes contain the least significant bits of the Display Count.
-
-5. The Display Count represents a 21-bit binary number that encodes an unsigned long integer within the range 0 to 2,097,152 (corresponding to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point).
-
-6. Apply the measurement unit to the Display Count value based on the unit extracted in step 1. This gives you the raw measurement value.
-
-7. Depending on the range (Bit 2-0 in Byte B0), scale the raw measurement value by dividing or multiplying it by the appropriate power of 10. The exact scaling factor should be determined based on your protocol's specifications.
-
-8. If the overrange flag is set (step 2), handle the overrange condition according to your protocol's specifications.
-
-9. If the sign bit is set (step 3), negate the measurement value obtained in step 7 to account for the negative sign.
-
-10. The result obtained in step 9 represents the final measurement value, scaled to the appropriate unit and range.
-
-## Resolution Note
-
-Please note that the Display Count provides slightly better resolution compared to what is displayed by the voltmeter. However, the extra resolution is not significant because it is smaller than the measurement error according to the voltmeter's specifications (more experimentation is needed to understand if there are special cases where the extra resolution could be significant).
-
-## Example
-
-Here's an example calculation using Bytes B0 to B3:
-
-- Byte B0: 00000101 (Unit = Ohm)
-- Byte B1: 01000000 (Positive, No Overrange)
-- Byte B2: 11011010 (Display Count LSB)
-- Byte B3: 00101101 (Display Count LSB)
-
-Procedure:
-- Unit: Ohm (from B0)
-- Overrange: No (from B1)
-- Sign: Positive (from B1)
-- Display Count: 1101101000101101 (from B2 and B3)
-- Scaling Factor: Determined by range and protocol specifications
-
-Final Measurement Value: 87021 Ohms (Scaled and considering unit and sign)
