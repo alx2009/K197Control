@@ -36,9 +36,10 @@ Here's an example of how a measurement result is encoded and transmitted within 
 | 2         | 1             | B1            |
 | 3         | 1             | B2            |
 | 4         | 1             | B3            |
+| 5         | 1             | B4            |
 
 -----------------------------------------------------------------------------------
-# Measurement Result Data - B0 Encoding
+# Command Data - B0 Encoding
 
 Description: This section explains how Byte B0 of the measurement result is encoded. B0 contains various parameters, including the measurement unit, AC/DC, relative measurement, and measurement range.
 
@@ -46,9 +47,9 @@ Description: This section explains how Byte B0 of the measurement result is enco
 
 Byte B0 is structured as follows:
 
-| Bit 7-6 (Unit) | Bit 5 (AC/DC) | Bit 4 (Undefined) | Bit 3 (Relative) | Bit 2-0 (Range) |
-|----------------|---------------|-------------------|------------------|----------------|
-| Unit           | AC/DC         | Undefined         | Relative         | Range          |
+| Bit 7-6 (Db)                  |         Bit 5-4 (Relative)        |           Bit 3-0 (Range)         |
+|----------------|--------------|---------------|-------------------|------------------|----------------|
+| Set dB         | dB           | Set Relative  | Relative          | Set Range        | Range          |
 
 - Bits 7 and 6 (Unit) together represent the measurement unit, as follows:
   - 00: Volt
