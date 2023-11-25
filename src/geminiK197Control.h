@@ -132,7 +132,7 @@ public:
         uint8_t msb : 5;    ///< binary count, bits 16-20
         bool ovrange : 1;   ///<  when true indicates overrange
         bool undefined : 1; ///< unknown use, normally set to 0
-        bool negative : 1;  ///< measurement unit
+        bool negative : 1;  ///< measurement sign
       };
 
     } __attribute__((packed)); ///< packs everything together
