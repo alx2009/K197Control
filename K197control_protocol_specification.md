@@ -72,7 +72,7 @@ Here's an example of a frame structure with a synchronization sequence:
 
 Description: This section outlines how measurement results and commands are encoded and transmitted. 
 
-## MEasurement Results
+## Retrieving measurement results from the K197
 
 Each measurement consists of 4 bytes, where each byte contains data from bit7 (MSB) to bit0 (LSB). When a new measurement rsult is available, the K197 will attempt to send it to the IEEE 488 bord using the gemini framing layer.
 
@@ -80,9 +80,11 @@ When the K197 is measuring continuosly, it will send about 3 measurements every 
 
 The format of the measurement data is described <tbd>
 
-## Measurement Commands 
+## Sending Commands to the K197
 
-Each measurement consists of 5 bytes, where each byte contains data from bit7 (MSB) to bit0 (LSB). When a command streucture is ready to be sent (execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
+Commands are always sent in a 5 bytes structure, where each byte contains data from bit7 (MSB) to bit0 (LSB). The structure allow buffering different command in the same 5 byte structre before they are sent to the K197. In this way the voltmeter can be completely reconfigured and triggered sending a single frame. 
+
+When a command structure is ready to be sent (execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
 
 The format of the control data is described <tbd>
 
