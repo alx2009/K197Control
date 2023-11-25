@@ -76,7 +76,7 @@ In principle there are a number of ways to detect a frame boundary:
 
 When sending a frame, if an acknowledgment timeout is detected by the lower layer the frame layer will assume that the peer is unavailable and skip the rest of the frame. If an incomplete frame has been received the entire frame must be ingnored. 
 
-It is also possible to send an empty frame (a frame consisted of a single synchronization sequence and no data). When the K197 is not measuring (e.g. due to the trigger mode) it will send empty frames to allow the IEE488 card to send commands in the opposite direction. 
+It is also possible to send an empty frame (a frame consisting of a single synchronization sequence and no data). When the K197 is not measuring (e.g. due to the trigger mode) it will send empty frames to allow the IEE488 card to send commands in the opposite direction. 
 
 ## The K197 control protocol
 
