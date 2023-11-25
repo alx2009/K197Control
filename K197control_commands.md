@@ -47,8 +47,8 @@ Description: This section explains how Byte B0 of the measurement result is enco
 
 Byte B0 is structured as follows:
 
-| Bit 7-6 (Db) || Bit 5-4 (Relative) || Bit 3-0 (Range) ||
-|--------------||--------------------||-----------------||
+| Bit 7-6 (Db) | a | Bit 5-4 (Relative) | a | Bit 3-0 (Range) | a |
+|--------------|---|--------------------|---|-----------------|---|
 | Set dB       | dB                 | Set Relative    | Relative          | Set Range        | Range          |
 
 - Bits 7 and 6 (Unit) together represent the measurement unit, as follows:
