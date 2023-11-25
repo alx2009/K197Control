@@ -41,7 +41,7 @@ Here's an example of how a measurement result is encoded and transmitted within 
 -----------------------------------------------------------------------------------
 # Command Data - B0 Encoding
 
-Description: This section explains how Byte B0 of the measurement result is encoded. B0 contains various parameters, including the measurement unit, AC/DC, relative measurement, and measurement range.
+Description: This section explains how Byte B0 of the command strcuture is encoded. B0 controls dB mode, relative measurement and measurement range.
 
 ## Byte B0 Format
 
@@ -102,59 +102,66 @@ In this example:
 
 # Command Data - B1 Encoding
 
-Description: This section explains how Byte B1 of the measurement result is encoded. B1 contains information about the sign of the measurement, an overrange flag, and the 5 most significant bits of the display count.
+Description: This section explains how Byte B1 of the command strcuture is encoded. B1 is used for setting the trigger mode and remote/local indication
+
 
 ## Byte B1 Format
 
 Byte B1 is structured as follows:
 
-| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
-|--------------|-------------------|-------------------|-----------------------------|
-| Sign         | Undefined         | Overrange         | Display Count MSB           |
+| Bit 7 (Control mode) | Bit 6 (Undefined) | Bit 5 (Control mode) | Bit 4 (Undefined) | Bit 3-0 (trigger mode) |
+|----------------------|-------------------|----------------------|-------------------|------------------------|
+| Set Control flag     | Undefined         | Remote Indication    | Undefined         | Trigger Mode           |
 
-- Bit 7 (Sign) represents the sign of the measurement:
-  - 1: Negative
-  - 0: Positive
+- Bit 7 is the Set Control flag:
+  - 0: do not change the remote/local control indication
+  - 1: Set the control indication according to the value of bit 5 (Control mode)
 
 - Bit 6 (Undefined) is undefined and should be set to 1.
 
-- Bit 5 (Overrange) is the overrange flag, indicating an overrange condition when set to 1.
+- Bit 5 (control Mode) controls the remote/local indication on the front panel:
+- 0 : set local control mode (RMT indicator on the front panel is not shown)
+- 1 : set remote control mode (RMT indicator on the front panel is shown)
 
-- Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the display count.
+- Bit 4 (Undefined) is undefined and should be set to 1.
 
-## Sign of the Measurement
+### Trigger Mode
+Bits 3-0 (Range) specify the trigger  mode. 
 
-Bit 7 (Sign) indicates whether the measurement is positive or negative:
-- 1: Negative
-- 0: Positive
+Bit 3 is the "set trigger mode" flag:
+  - 0: Do not change the trigger mode
+  - 1: Set the trigger mode according to bits 2-0
 
-## Undefined Bit
-
-Bit 6 (Undefined) is undefined and should be set to 1.
-
-## Overrange Flag
-
-Bit 5 (Overrange) serves as an overrange flag. It is set to 1 to indicate an overrange condition.
-
-## Display Count MSB
-
-Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the display count.
+Bit 2-0 specifies the trigger mode:
+  - 000: Reserved
+  - 001: Reserved
+  - 010: Continuos trigger on TALK/GET event (corresponds to mode T0 and T2 in the K197 IEEE 488 manual)
+  - 011: One shot trigger on TALK/GET event (corresponds to mode T1 and T3 in the K197 IEEE 488 manual)
+  - 100: TALK/GET event (used to trigger the voltmeter, corresponds to a TALK or GET event in the IEEE bus)
+  - 101: Reserved
+  - 110: Continuos trigger on Execute (corresponds to mode T4 in the K197 IEEE 488 manual)
+  - 111: Continuos trigger on Execute (corresponds to mode T4 in the K197 IEEE 488 manual)
 
 ## Example
 
 Here's an example of Byte B1 with various parameters set:
 
-| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
-|--------------|-------------------|-------------------|-----------------------------|
-| 1            | 1                 | 0                 | 11010                       |
+| Bit 7 (Control mode) | Bit 6 (Undefined) | Bit 5 (Control mode) | Bit 4 (Undefined) | Bit 3-0 (trigger mode) |
+|----------------------|-------------------|----------------------|-------------------|------------------------|
+| 0                    | 1                 | 0                    | 1                 | 1011                   |
 
 In this example:
-- The measurement is negative.
-- Bit 6 is undefined and set to 1.
-- There is no overrange condition (Bit 5 is 0).
-- The 5 most significant bits of the display count are 11010.
+- The control mode is not changed.
+- Trigger mode is set to "One shot trigger on TALK/GET event"
 
-# Measurement Result Data - B2 and B3 Encoding
+After this command is received, the Voltmeter will stop masuring. A single meaasurement will be triggerd when a new command is received indicating a TALK/GET event (bits 3-0 in B1 set to 1100). 
+
+# Command Data - B2 Encoding
+
+Description: This section explains how Byte B2 of the command strcuture is encoded. B2 is used to control the source of the measurement (display or stored readings)
+
+
+
 
 Description: This section explains how Bytes B2 and B3 of the measurement result encode the least significant bits of the display count.
 
