@@ -36,9 +36,10 @@ Here's an example of how a measurement result is encoded and transmitted within 
 | 2         | 1             | B1            |
 | 3         | 1             | B2            |
 | 4         | 1             | B3            |
+| 5         | 1             | B4            |
 
 -----------------------------------------------------------------------------------
-# Measurement Result Data - B0 Encoding
+# Command Data - B0 Encoding
 
 Description: This section explains how Byte B0 of the measurement result is encoded. B0 contains various parameters, including the measurement unit, AC/DC, relative measurement, and measurement range.
 
@@ -46,62 +47,60 @@ Description: This section explains how Byte B0 of the measurement result is enco
 
 Byte B0 is structured as follows:
 
-| Bit 7-6 (Unit) | Bit 5 (AC/DC) | Bit 4 (Undefined) | Bit 3 (Relative) | Bit 2-0 (Range) |
-|----------------|---------------|-------------------|------------------|----------------|
-| Unit           | AC/DC         | Undefined         | Relative         | Range          |
+| Bit 7-6 (Db) | Bit 5-4 (Relative) | Bit 3-0 (Range) |
+|--------------|--------------------|-----------------|
+| dB mode      | Relative mode      | Range           | 
 
-- Bits 7 and 6 (Unit) together represent the measurement unit, as follows:
-  - 00: Volt
-  - 10: Ampere
-  - 01: Ohm
-  - 11: Decibel (dB)
+- Bits 7 and 6 (Unit) together control the dB mode:
+  - 10: dB mode off
+  - 11: dB mode on
+  - 00: no change
+  - 01: reserved (do not use)
+ 
+- Bits 5 and 4 (Relative) together control the Relative mode:
+  - 10: Relative mode off
+  - 11: Relative mode on
+  - 00: no change
+  - 01: reserved (do not use)
+ 
+### Measurement Range
 
-- Bit 5 (AC/DC) represents the AC/DC nature of the measurement:
-  - 0: DC (Direct Current)
-  - 1: AC (Alternating Current)
+Bits 3-0 (Range) specify the measurement range. 
 
-- Bit 4 (Undefined) is undefined and reserved for future use.
+Bit 3 is the "set range" flag:
+  - 0: Do not change the range
+  - 1: Set the range according to bits 2-0
 
-- Bit 3 (Relative) indicates a relative measurement when set to 1.
-
-- Bits 2-0 (Range) indicate the measurement range and can assume values from 1 to 6.
-
-## Encoding of Measurement Unit
-
-The measurement unit in Byte B0 is encoded using bits 7 and 6 (Unit), as described earlier.
-
-## AC/DC Nature
-
-Bit 5 (AC/DC) indicates whether the measurement is AC or DC. When it is set to 0, the measurement is DC; when set to 1, the measurement is AC.
-
-## Relative Measurement
-
-Bit 3 (Relative) indicates a relative measurement when set to 1.
-
-## Measurement Range
-
-Bits 2-0 (Range) specify the measurement range and can assume values from 1 to 6.
+Bit 2-0 specifies the range:
+  - 0x0: Set range to Auto
+  - 0x1: Set range to 200 mv (Volt mode) or 200 Ohm (Ohm mode)
+  - 0x2: Set range to 2 V (Volt mode) or 2 KOhm (Ohm mode)
+  - 0x3: Set range to 20 V (Volt mode) or 20 KOhm (Ohm mode)
+  - 0x4: Set range to 200 V (Volt mode) or 200 KOhm (Ohm mode)
+  - 0x5: Set range to 1 KV (Volt mode) or 2-200 MOhm (Ohm mode)
+  - 0x6: Reserved
+  - 0x7: Reserved
 
 ## Example
 
 Here's an example of Byte B0 with various parameters set:
 
-| Bit 7-6 (Unit) | Bit 5 (AC/DC) | Bit 4 (Undefined) | Bit 3 (Relative) | Bit 2-0 (Range) |
-|----------------|---------------|-------------------|------------------|----------------|
-| 0              | 1             | 0                 | 1                | 101            |
+| Bit 7-6 (Db) | Bit 5-4 (Relative) | Bit 3-0 (Range) |
+|--------------|--------------------|-----------------|
+| 00           | 10                 | 1000            | 
 
 In this example:
-- The measurement unit is Ampere (01).
-- The measurement is AC (Alternating Current).
-- Bit 4 is undefined.
-- It is a relative measurement.
-- The measurement range is 5.
+- The dB mode is not changed.
+- Measurement will be absolute (if Relative mode waas set it is cleared).
+- Set auto range.
 
 ## Notes
 
-- Undefined bits should be ignored (seems to be always set to 1).
+- Setting the range has an effect only in Volt and Ohm mode, where it will override the front panel switches (as long as they are not touched)
+- If the range is subsequently changed with the front panel switches, it will override the value set via IEEE 488 interface (at least with firmware A01).
+- In Amper mode, setting the range via IEEE 488 interface has no effect
 
-# Measurement Result Data - B1 Encoding
+# Command Data - B1 Encoding
 
 Description: This section explains how Byte B1 of the measurement result is encoded. B1 contains information about the sign of the measurement, an overrange flag, and the 5 most significant bits of the display count.
 
