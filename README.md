@@ -105,7 +105,7 @@ Some definitions used in the following:
 
 When the display value is 0, the binary count is 0x0. When the display value is "400000", the binary count would be 0x200000 or 2097152 decimal (this is an extrapolation, the highest value that can be sent is actually 0x1FFFFF).
 
-In principle any value x in between can be calculated with the formula x = raw_count * 400000 / 2097152. In practice care should be taken in the calculation to avoid loss of precision, in particular when 32 bit integer or floating point math must be used (as is the case with the AVR where double are the same as float).
+In principle any value x in between can be calculated with the formula x = binary_count * 400000 / 2097152. In practice care should be taken in the calculation to avoid loss of precision, in particular when 32 bit integer or floating point math must be used (as is the case with the AVR where double are the same as float).
 
 The decimal point can be inferred from the range (which is provided as an integer from 1 to 7). The sign is included in a separate bit.
 
