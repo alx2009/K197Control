@@ -22,7 +22,7 @@ Once the library is installed, the example programs can be found in the Arduino 
 - The K197ControlDataLogger example demonstrates how to log measurements results to Serial (Add an Arduino mini and a blutooth module and suddently your voltmeter can log data via bluetooth)
 - The K197DataAcquisition example is similar to K197ControlDataLogger but in addition can send command to the voltmeter, including setting trigger mode and overriding the range.
 
-The protocol specification is available here: https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
+The protocol specification is available here (only needed if you want to modify the library or create your own) : https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
 
 ## Limitations
 
