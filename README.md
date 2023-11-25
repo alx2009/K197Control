@@ -70,7 +70,7 @@ The examples provided with the library replicate the timing observed with the IE
 The gemini frame protocol packs and unpacks sequence of bytes in frames. A frame is composed of sub-frames and synchronization sequences. Each sub-frame is composed by 9 bits: a start bit (set to 1) and 8 data bits encoding a byte of data. Any consecutive 0 bits outside a sub-frame are synchronization sequences. Both the sub-frame rapresenting the bytes and the bits within a subframe are sent MSB first.
 
 In principle there are a number of ways to detect a frame boundary:
-- detect an initial synchronization sequence with 9 or more consecutive zeroes (this seems to be the case for the K197 but I have not used thie method in the library).  
+- detect an initial synchronization sequence with 9 or more consecutive zeroes (this seems to be the case for the K197 but I have not used this method in the library).  
 - rely on a frame timout period. Once the communication is idle for more than the frame timeout period, the next bit will start a new frame (this is the method implemented in the library).
 - use frames of known lenght. Once all the bytes of a frame have been received we know that the frame reception is complete (this is also supported by the library so that we can process a frame as soon as possible)
 
