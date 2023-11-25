@@ -78,7 +78,7 @@ Each measurement consists of 4 bytes, where each byte contains data from bit7 (M
 
 When the K197 is measuring continuosly, it will send about 3 measurements every second. When the K197 is waiting for a trigger, an empty frame is sent instead (this is done so the IEEE 488 card can trigger the measurement and/or sned any other command to the K197). This emtpty is sent more frequently than 3 times a second, in this way the IEEE 488 can can trigger a measurement more quickly (see next session).
 
-The format of the measurement data is described <tbd>
+The format of the measurement data is described here: https://github.com/alx2009/K197Control/blob/main/K197control_measurements.md
 
 ## Sending Commands to the K197
 
@@ -86,5 +86,5 @@ Commands are always sent in a 5 bytes structure, where each byte contains data f
 
 When a command structure is ready to be sent (execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
 
-The format of the control data is described <tbd>
+The format of the control data is described here: https://github.com/alx2009/K197Control/blob/main/K197control_commands.md
 
