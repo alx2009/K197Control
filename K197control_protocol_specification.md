@@ -4,7 +4,7 @@ Description: The framing layer divides the continuous bitstream into frames and 
 ## how the gemini protocol works
 The gemini layer is responsible for exchanging bits between two peers. Normally one peer is configured to initiate the communication and is the one controlling when the communication starts and ends. 
 
-When the initiator want to send a bit to the other side, it will set the outup pin high, then set it according to the bit value and wait for an acknowledgement ((up to a maximum time, then it will time-out)). When the other peer detects a positive edge, it will wait for a predetermined setup time, read the value of the input pin and acknowledge generating a positive edge on its own output pin. The acknowledgment is also used to send a bit in the opposite direction in the same way.
+When the initiator want to send a bit to the other side, it will set the output pin high, then set it according to the bit value and wait for an acknowledgement ((up to a maximum time, then it will time-out)). When the other peer detects a positive edge, it will wait for a predetermined setup time, read the value of the input pin and acknowledge generating a positive edge on its own output pin. The acknowledgment is also used to send a bit in the opposite direction in the same way.
 
 When sending a 0 bit, a short pulse is generated on the output pin. The duration of the pulse should be significantly shorter than the setup time, otherwise it could be misunderstood for a 1 level. However it should be long enough to be detected by the other peer (for the K197, it should be at least 1 microsecond long to be detected reliably).
 
