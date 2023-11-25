@@ -76,7 +76,7 @@ Description: This section outlines how measurement results and commands are enco
 
 Each measurement consists of 4 bytes, where each byte contains data from bit7 (MSB) to bit0 (LSB). When a new measurement rsult is available, the K197 will attempt to send it to the IEEE 488 bord using the gemini framing layer.
 
-When the K197 is measuring continuosly, it will send about 3 measurements every second. When the K197 is waiting for a trigger, an empty frame is sent instead (this is done so the IEEE 488 card can trigger the measurement and/or sned any other command to the K197). This emtpty is sent more frequently than 3 times a second, in this way the IEEE 488 can can trigger a measurement more quickly (see next session).
+When the K197 is measuring continuosly, it will send about 3 measurements every second. When the K197 is waiting for a trigger, an empty frame is sent instead (this is done so the IEEE 488 card can trigger the measurement and/or sned any other command to the K197). This emtpty frame is sent more frequently than 3 times a second, in this way the IEEE 488 can can trigger a measurement more quickly (see next session).
 
 The format of the measurement data is described here: https://github.com/alx2009/K197Control/blob/main/K197control_measurements.md
 
