@@ -18,7 +18,7 @@ A command structure is represented as follows:
 
 ## Encoding and Transmission
 
-Commands are transmitted within sub-frames as part of the data payload. The protocol encodes and transmits each byte of the measurement data in a series of sub-frames, with each sub-frame containing one byte of data.
+Commands are transmitted by the gemini framing protocol within sub-frames as part of the data payload. The protocol encodes and transmits each byte of the measurement data in a series of sub-frames, with each sub-frame containing one byte of data.
 
 For example, to transmit a command:
 
