@@ -2,7 +2,7 @@
 
 This is an Arduino library that allows to control a K197 voltmeter with the internal interface used by the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
 
-The lower layer protocol could also be used as a generic two wire communication protocol between two microcontrollers (only an input pin supporting edge interrupt + output pin is needed on each microcontroller). 
+The lower layer protocol could even be used as a generic two wire communication protocol between two microcontrollers (only one input pin supporting edge interrupt + one output pin is needed on each microcontroller). 
 
 At the moment the library only supports Arduino Uno and other boards with a compatible microcontroller.
 
