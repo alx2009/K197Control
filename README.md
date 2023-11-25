@@ -95,7 +95,7 @@ Not all aspects and fields have been reverse engineered at this point. In partic
 
 ### Calculating the mesurement result
 
-The K197 send the measurement result as a 21 bit unsigned binary number which is proportional but different from the absolute displayed value. 
+The K197 send the measurement result as a 21 bit unsigned binary number which is proportional but different from the measured value. 
 
 Some definitions used in the following: 
 - measurement value is the value of the measurement, including sign and decimal point. 
