@@ -1,14 +1,12 @@
 # K197Control
 
-This is an Arduino library that allows to control a K197 voltmeter with the internal interface used by the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
+This is an Arduino library to control a K197 voltmeter with the internal interface intended for the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
 
 The lower layer protocol could even be used as a generic two wire communication protocol between two microcontrollers (only one input pin supporting edge interrupt + one output pin is needed on each microcontroller). 
 
 At the moment the library only supports Arduino Uno and other boards with a compatible microcontroller.
 
 ## DISCLAIMER: Please note that the purpose of this repository is educational. Any use of the information for any other purpose is under own responsibility.
-
-Furthermore, this library has been tested with only one card (mod. 1972A) and one voltmeter (mod. 197A, SW revision level A01). It may or may not work elsewhere, e.g. due to different firmware revision. 
 
 # Installation and use
 
@@ -26,7 +24,9 @@ In case you want to understand how the K197 comunicates with the programs (e.g. 
 
 ## Limitations
 
-This is a very early release, developed at the same time the protocol was reverse engineered. Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in future revisions. I also expect that there are many bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
+This is a very early release, developed at the same time the protocol was reverse engineered using a IEEE 488 card (mod. 1972A) and one voltmeter (mod. 197A, SW revision level A01). It may or may not work elsewhere, e.g. due to different firmware revision. 
+
+Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in future revisions. I also expect that there are many bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
 
 # Background information
 
