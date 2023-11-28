@@ -98,7 +98,7 @@ The K197 send the measurement result as a 21 bit unsigned binary number which is
 Some definitions used in the following: 
 - measurement value is the value of the measurement, including sign and decimal point. 
 - measurement result is the complete measurement result, including unit, AC mode, overrange indicators and measurement value
-- display value is the absolute value of the measurement result, without sign and decimal point 
+- display value is the absolute value of the measurement value, without sign and decimal point 
 - binary count (or count in short) is the 21 bit unsigned binary number sent by the K197. The binary count is proportional to the display value (see below). 
 
 When the display value is 0, the binary count is 0x0. When the display value is "400000", the binary count would be 0x200000 or 2097152 decimal (this is an extrapolation, the highest value that can be sent is actually 0x1FFFFF).
