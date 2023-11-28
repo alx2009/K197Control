@@ -91,7 +91,7 @@ For the coding of the bits please refer to the protocol specification (https://g
 
 Not all aspects and fields have been reverse engineered at this point. In particular, calibration is missing completely and retrieving stored data is not working.  
 
-### Calculating the mesurement result
+### Calculating the measurement result
 
 The K197 send the measurement result as a 21 bit unsigned binary number which is proportional but different from the measured value. 
 
