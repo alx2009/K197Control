@@ -1,4 +1,4 @@
-# K197Control
+hanced # K197Control
 
 This is an Arduino library to control a K197 voltmeter with the internal interface intended for the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
 
@@ -109,9 +109,11 @@ The decimal point can be inferred from the range (which is provided as an intege
 
 The library includes a number of functions to access the measurement value as different data types. This includes a logarithmic format with separate integers for characteristic and mantissa. It is also possible to access the value as a double, albeit on the AVR this is the same as float and has just enough precision to hold the measurement value.
 
-At this point, an alert reader will notice that the binary count has a higher resolution than what the voltmeter is displaying. In order to experiment with this, the library implements a set of "Extended Resolution" (ER) functions that can provide a value with 2 additional significant digits. 
+#### Enhanced Resolution
 
-Does this mean that we have a 7 1/2 digit voltmeter now? No, most definitely not. The voltmeter is not designed to have the accuracy required for more than 220000 counts. In particular the voltage reference is not good enough, and there may be other limiting factors (e.g. noise level). And yet, while the additional counts are not available digitally, they are used by the analog output option when configured in the X1000 mode. The IEEE488 manual states explicitly that the X1000 mode extends the resolution of the Model 197 beyond the 5 1/2 digits of the display. It goes on claiming that the extra resolution allows for a more continuos output when high resolution is required. This suggests that there could be use cases where having an extended resolution could be beneficial.
+At this point, an alert reader will notice that the binary count has a higher resolution than what the voltmeter is displaying. In order to experiment with this, the library implements a set of "Enhanced Resolution" (ER) functions that can provide a value with 2 additional significant digits. 
+
+Does this mean that we have a 7 1/2 digit voltmeter now? No, most definitely not. The voltmeter is not designed to have the accuracy required for more than 220000 counts. In particular the voltage reference is not good enough, and there may be other limiting factors (e.g. noise level). And yet, while the additional counts are not available digitally, they are used by the analog output option when configured in the X1000 mode. The IEEE488 manual states explicitly that the X1000 mode extends the resolution of the Model 197 beyond the 5 1/2 digits of the display. It goes on claiming that the extra resolution allows for a more continuos output when high resolution is required. This suggests that there could be use cases where having an enhanced resolution could be beneficial, so the library provides the needed support to experiment with this concept.
 
 
 
