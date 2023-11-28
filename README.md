@@ -1,4 +1,4 @@
-hanced # K197Control
+# K197Control
 
 This is an Arduino library to control a K197 voltmeter with the internal interface intended for the IEEE488 option. The communication is over a two wire bus (one wire for each direction).
 
