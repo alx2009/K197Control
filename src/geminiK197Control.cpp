@@ -256,7 +256,7 @@ GeminiK197Control::K197measurement::getResultAsString(char *buffer) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//       Extended resolution functions
+//       Enhanced resolution functions
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 /*!
@@ -264,7 +264,7 @@ GeminiK197Control::K197measurement::getResultAsString(char *buffer) const {
    extending the resolution
      @details the absolute value of the measurement is the displayed value,
    without sign, decimal point and with 2 more digits to extend the resolution
-     Extended Resolution (ER) functions give access to the full resolution
+     Enhanced Resolution (ER) functions give access to the full resolution
    available from the K197. Note that we do not make any claim to extend the
    accuracy of the measurement For example, if the display shows -200.000 mV,
    the absolute value ER would be 20000000
@@ -282,7 +282,7 @@ unsigned long GeminiK197Control::K197measurement::getAbsValueER() const {
      @brief  get the  value of the measurement as long integer, extending the
    resolution
      @details the value of the measurement is the displayed value, without
-   decimal point and with 2 more digits to extend the resolution Extended
+   decimal point and with 2 more digits to enhance the resolution. Enhanced
    Resolution (ER) functions give access to the full resolution available from
    the K197. Note that we do not make any claim to extend the accuracy of the
    measurement For example, if the display shows -200.000 mV, the  value ER
@@ -297,7 +297,7 @@ long GeminiK197Control::K197measurement::getValueER() const {
      @brief  get the value of the measurement as double ER (not recommended for
    AVR)
      @details the value of the measurement as a double, extending the
-   resolution. Extended Resolution (ER) functions give access to the full
+   resolution. Enhanced Resolution (ER) functions give access to the full
    resolution available from the K197. Note that we do not make any claim to
    extend the accuracy of the measurement
 
@@ -322,7 +322,7 @@ double GeminiK197Control::K197measurement::getValueAsDoubleER() const {
      @brief  get the value as a null terminated string and extending the
    resolution
      @details the value is always in exponential format, as used by the K197
-   IEEE-488 card. Extended Resolution (ER) functions give access to the full
+   IEEE-488 card. Enhanced Resolution (ER) functions give access to the full
    resolution available from the K197. Note that we do not make any claim to
    extend the accuracy of the measurement
 
