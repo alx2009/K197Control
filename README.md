@@ -33,28 +33,26 @@ Only a limited amount of tests has been performed. As such the API is not fully 
 This library was inspired from discussions in the EEVBlog forum: https://www.eevblog.com/forum/testgear/keithley-197a-owners_-corner/ and https://www.eevblog.com/forum/projects/replacement-display-board-for-keithley-197a/msg4232665/#msg4232665
 
 Some forum members suggested to use the IEEE488 internal interface to control the voltmeter via bluetooth (inside the voltmeter there is a 6 pin connector used by an optional IEEE488 interface board). 
-Using the IEEE interface instead of the display interface offers more possibilities to control the voltmeter, for example it is possible to select the range bypassing the front panel switches (albeit this is possible only for volt and Ampere modes, it is also not possible to change modes or switch between Ac and DC). With the help of a forum member who lended me a IEEE488 card, I managed to reverse engineer the protocol used. This library and the associated examples implement this protocol.
+Using the IEEE interface instead of the display interface offers more possibilities to control the voltmeter, for example it is possible to select the range bypassing the front panel switches (albeit this is not possible in Ampere mode. Switching between AC and DC can only be done via fron panel switch). With the help of a forum member who lended me a IEEE488 card, I managed to reverse engineer the protocol used. This library and the associated examples implement this reverse engineered protocol.
 
-The protocol used by the K197 to communicate with the IEEE board uses two wires, one for each direction. As far as I know it is a unique protocol (at least, I never encountered it before). If you know of other applications using a similar protocol please comment in one of the forum threads linked above.
+The protocol used by the K197 to communicate with the IEEE board uses two wires, one for each direction. As far as I know it is a unique protocol (at least, I never encountered it before). If you know of other applications/instruments using a similar protocol please comment in one of the forum threads linked above.
+
+The K197 voltmeter was designed at the time where hardware support for serial communication was rarely integrated in generic I/O peripherals. Rather than using a dedicated IC (e.g. a UART), the designers implemented a full duplex protocol which can be efficiently bit banged and is very tolerant of any delay from either side. In addition to the input and output I/O pins, the only other HW resource required is an edge sensitive interrupt. 
 
 To understand the protocol, it is useful to think of three layers (this is somewhat arbitrary but bear with me for now), which I dubbed gemini, gemini frame and K197 control respectively:
-- The gemini protocol is the lowest layer and is responsible to send bit sequences between two peers
-- The gemini frame sits on top of gemini and is responsible for  packing/unpacking byte sequences into frames which are sent/received using the lower layer
+- The gemini protocol is the lowest layer and is responsible to send a stream of bits between two peers. For every bit transmitted in one direction there is a bit transmitted in the opposite direction.
+- The gemini frame sits on top of gemini and is responsible for packing/unpacking byte sequences into frames which are sent/received using the lower layer
 - The K197 control protocol encodes commands (to the K197) or measurement results (from the K197) as byte sequences that are sent or received using the gemini frame protocol
 
 The above model is useful to understand the protocol and the library class hierarchy, obviously the original designers of the protocol might have had a completely different model in mind.
 
-The K197 voltmeter was designed at the time where hardware support for serial communication was rarely integrated in generic I/O peripherals. Rather than using a dedicated IC (e.g. a UART), they designed a full duplex protocol which can be efficiently bit banged and is very tolerant of any delay from either side. In addition to the input and output I/O pins, the only other HW resource required is an edge sensitive interrupt. 
-
-In fact, the two lower layers (gemini and gemini frame) could be useful even with modern micros when running out of serial ports.
-
 ## The gemini protocol in a nutshell
 
-Let's call Bob and Alice the two peers that are comunicating via gemini protocol. When nothing need to be transmitted, Bob and Alice will keep their output pins LOW, while monitoring for a positive edge on their input pins (idle state). When Bob wants to send a bit to Alice, he will set the outup pin high, then he will set it according to the bit value and wait for an acknowledgement from Alice (up to a maximum time, then it will time-out).
+Let's call Bob and Alice the two peers that are comunicating via the gemini protocol. When nothing need to be transmitted, Bob and Alice will keep their output pins LOW, while monitoring for a positive edge on their input pins (idle state). When Bob wants to send a bit to Alice, he will set the outup pin high, then he will set it according to the bit value and wait for an acknowledgement from Alice (up to a maximum time, then it will time-out).
 
 When Alice detects a positive edge, she will wait for a predetermined setup time and then read the value of the input pin. As soon as she has got the bit value, she will acknowledge generating a positive edge on its own output pin.  
 
-But this is not all. The acknowledgment can be used to send a bit in the opposite direction using exactly the same logic. Immediately after Alice sets the output pin high to acknowledge the reception, she has two choices: if she does not have any data to send, she will return the output pin to the idle state (LOW). If she has data to send, she will set the output pin according to the bit value and wait for an acknowledgement from Bob (which is also including a bit to alice and so forth).
+But this is not all. The acknowledgment is used to send a bit in the opposite direction using exactly the same logic. Immediately after Alice sets the output pin high to acknowledge the reception, she has two choices: if she does not have any data to send, she will return the output pin to the idle state (LOW). If she has data to send, she will set the output pin according to the bit value and wait for an acknowledgement from Bob (which is also including a bit to alice and so forth).
 
 But wait a minute, doesn't this result in an endless sequence of transmissions? Indeed, my first apish attempts resulted in a never ending back and forth transmission. The way it works is that the peer that initiates the communication is also the one that controls its end (by not replying to the last acknowledgement). In this way, for every bit transmitted in one direction there is a bit transmitted in the opposite direction. 
 
@@ -63,7 +61,7 @@ Note that there is a risk that Alice and Bob initiate a transmission at the same
 ### Timing
 When sending a 0 bit, a short pulse is generated on the output pin. The duration of the pulse should be significantly shorter than the setup time, otherwise it could be misunderstood for a 1 level. However it should be long enough to be detected by the other peer. Looking at the datasheet for the 6821 Peripheral Interface Adapter used in the K197, the minimum duration is around 1 us (microsecond). However the pulse lenght observed is between 15 and 30 us, while the setup time is around 200 us. Sending a complete frame takes around 40 ms (milliseconds).
 
-The examples provided with the library replicate the timing observed with the IEEE card, but this can be changed. The pulse duration can be reduced to a few us without apparent issues. The setup time can also be reduced but this hasn't been tested with the K197, yet.
+The examples provided with the library replicate the timing observed with the IEEE card, but this can be changed. The pulse duration can be reduced to a few us without apparent issues. The setup time can also be reduced but this hasn't been tested with the K197, yet. 
 
 ## The gemini frame protocol
 
