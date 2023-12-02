@@ -22,11 +22,13 @@ Once the library is installed, the example programs can be found in the Arduino 
 
 In case you want to understand how the K197 comunicates with the programs (e.g. to modify the library or create your own), the protocol specification can be found here: https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
 
-## Limitations
+## Known Limitations
 
 This is a very early release, developed at the same time the protocol was reverse engineered using a IEEE 488 card (mod. 1972A) and one voltmeter (mod. 197A, SW revision level A01). It may or may not work elsewhere, e.g. due to different firmware revision. 
-
-Only a limited amount of tests has been performed. As such the API is not fully consistent and may have to be changed in future revisions. I also expect that there are many bugs lingering around. One known limitation is that the library does not implement the acknowdlege timeout. This means that if the other party does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
+Only a limited amount of tests has been performed. 
+The API is not fully consistent and may have to be changed in future revisions. I also expect that there are many bugs lingering around.
+Status report and calibration have not been reverse engineering. Reading stored data is not working.
+The library does not implement the acknowdlege timeout. This means that if the K197 does not acknowledge a bit the library will hang. In practice this is rare as the K197 seems to be very well behaved.  
 
 # Background information
 
