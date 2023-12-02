@@ -266,9 +266,9 @@ Please note that the Display Count provides slightly better resolution compared 
 Here's an example calculation using Bytes B0 to B3:
 
 - Byte B0: 00000101 (Unit = Ohm)
-- Byte B1: 01000000 (Positive, No Overrange)
-- Byte B2: 11011010 (Display Count LSB)
-- Byte B3: 00101101 (Display Count LSB)
+- Byte B1: 01000000 (Positive, No Overrange, binary count bits 20-16 = 0)
+- Byte B2: 11011010 (Binary Count bits 15-8)
+- Byte B3: 00101101 (binary Count bits 7-0)
 
 Procedure:
 - Unit: Ohm (from B0)
@@ -277,4 +277,10 @@ Procedure:
 - Display Count: 1101101000101101 (from B2 and B3)
 - Scaling Factor: Determined by range and protocol specifications
 
-Final Measurement Value: 87021 Ohms (Scaled and considering unit and sign)
+Binary count = 55853. display count = 55853 * 400000 / 2097152 = 10653 (rounded to the next integer)
+
+Final Measurement Value: 10653 Ohms (Scaled and considering unit and sign)
+
+If we want to extend the resolution, the display value would be 55853 * 40000000 / 2097152 = 1065311 (rounded to the next integer), corresponding to 10653.11 Ohm when we consider unit and range
+
+
