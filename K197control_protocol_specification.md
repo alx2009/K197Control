@@ -77,9 +77,9 @@ For generic use (anything other than controlling the K197 voltmeter):
 
 The control protocol layer is used by the K197 to send measurement results to the IEEE488 card and receive commands back from the card. 
 
-When the K197 has a new measurement, it will be always sent to the IEE488 card. The card will return the latest available measurement when requested to do so via IEE488 bus (e.g. READ)
+When the K197 has a new measurement, it will be sent to the IEE488 card directly (the K197 is the initiator). The card will never intiate a communication on its own. When the K197 initiates a new frame, the card has an opportunity to retuirn any command that may be ready for transmission to the K197.
 
-Commands that only affect the IEE488 bus are handled by the IEE488 card directly. Some commands (e.g. REN, GTL) are sent to the K197 as soon as possible but most commands are cached in the IEEE488 card until the "X" (Execute) command is received. Then the entire command sequence is sent to the K197.
+Note that commands that only affect the IEE488 bus are handled by the IEE488 card directly. Some commands (e.g. REN, GTL) are sent to the K197 as soon as possible but most commands are cached in the IEEE488 card until the "X" (Execute) command is received. Then the entire command sequence is marked as ready for transmisison, and it will be sent to the K197 with the next frame.
 
 If an Acknowledge Timeout even is reported by the lower layer, the control protocol will assume that the other party is not present or temporarily busy. It will wait at least a frame timout before attempting a new transmission. 
 
