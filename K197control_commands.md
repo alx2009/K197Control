@@ -96,7 +96,7 @@ In this example:
 
 ## Notes
 
-- Setting the range has an effect only in Volt and Ohm mode, where it will override the front panel switches (as long as they are not touched)
+- Setting the range has an effect only in Volt and Ohm mode, where it will override the front panel switches
 - If the range is subsequently changed with the front panel switches, it will override the value set via IEEE 488 interface (at least with firmware A01).
 - In Amper mode, setting the range via IEEE 488 interface has no effect
 
