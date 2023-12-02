@@ -25,6 +25,8 @@ A frame consists of the following components:
 
 All components are optional, but obviously at least one component must be present for a frame to exist
 
+The party that is starting a frame is also controlling when the frame ends, by not acknowledging the last bit sent by the other party (otherwise the other party would acknowledge the acknowledge and the frame would never end). 
+
 Timeout (t_frame): if no data is sent within a t_frame time interval (frame timout), the next bit will be considered as the start of a new frame
 
 
@@ -40,7 +42,7 @@ A sub-frame contains the following components:
 ## Frame Synchronization
 
 - The synchronization sequence (if used) consists of zero bits and is placed at the beginning of the frame.
-- Its purpose is to aid in frame detection and synchronization. It is also used when the number of sub-frames in the two directions are different, due to the fact that the number of bits sent in each direction must be the same (for each bit sent in one direction there is a corrresponding bit sent in the opposite direction). 
+- Its purpose is to aid in frame detection and synchronization. It is also used when the number of sub-frames in the two directions are different, due to the fact that the number of bits sent in each direction must be the same (within a frame, for each bit sent in one direction there is a corrresponding bit sent in the opposite direction, albeit the last bit of a frame is not acknowledged). 
 
 The K197 add a synchronization sequence at the beginning of the communication, the IEEE488 card may add synchronization sequences at the end of the communication 
 
