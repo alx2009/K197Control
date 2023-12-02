@@ -154,7 +154,7 @@ In this example:
 - The control mode is not changed.
 - Trigger mode is set to "One shot trigger on TALK/GET event"
 
-After this command is received, the Voltmeter will stop masuring. A single meaasurement will be triggerd when a new command is received indicating a TALK/GET event (bits 3-0 in B1 set to 1100). 
+After this command is received, the Voltmeter will stop masuring. A single meaasurement will be triggered when a new command is received indicating a TALK/GET event (bits 3-0 in B1 set to 1100). 
 
 # Command Data - B2 Encoding
 
