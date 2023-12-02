@@ -20,7 +20,7 @@ Once the library is installed, the example programs can be found in the Arduino 
 - The K197ControlDataLogger example demonstrates how to log measurements results to Serial
 - The K197DataAcquisition example is similar to K197ControlDataLogger but in addition it can send command to the voltmeter, including setting trigger mode and overriding the range.
 
-In case you want to understand how the K197 comunicates with the programs (e.g. to modify the library or create your own), the protocol specification can be found here : https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
+In case you want to understand how the K197 comunicates with the programs (e.g. to modify the library or create your own), the protocol specification can be found here: https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
 
 ## Limitations
 
