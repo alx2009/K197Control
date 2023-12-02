@@ -281,6 +281,6 @@ Binary count = 55853. display count = 55853 * 400000 / 2097152 = 10653 (rounded 
 
 Final Measurement Value: 10653 Ohms (Scaled and considering unit and sign)
 
-If we want to extend the resolution, the display value would be 55853 * 40000000 / 2097152 = 1065311 (rounded to the next integer), corresponding to 10653.11 Ohm when we consider unit and range
+If we wanted to extend the resolution, the display value would be 55853 * 40000000 / 2097152 = 1065311 (rounded to the next integer), corresponding to 10653.11 Ohm when we consider unit and range
 
 
