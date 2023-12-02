@@ -158,7 +158,7 @@ After this command is received, the Voltmeter will stop masuring. A single meaas
 
 # Command Data - B2 Encoding
 
-Description: This section explains how Byte B2 of the command strcuture is encoded. B2 is used to control the source of the measurement (display or stored readings)
+Description: This section explains how Byte B2 of the command structure is encoded. B2 is used to control the source of the measurement (display or stored readings)
 
 ## Byte B2 format
 
