@@ -84,7 +84,7 @@ Note that it is possible to send an empty frame (a frame consisting of a single 
 
 ## The K197 control protocol
 
-As anticipated, the K197 is always the initiator of the comunication. When it is triggered, it will attempt to send the measurement result encoded in a frame including an initial synchronization sequence of 16 '0' and the 4 sub-frames with 4 bytes of data. When the K197 is not triggered, it will still periodically "poll" the IEEE board sending an empty frame.
+As anticipated, the K197 is always the initiator of the comunication. When it is triggered, it will attempt to send the measurement result encoded in a frame including an initial synchronization sequence of 16 '0' and  4 sub-frames with 4 bytes of data. When the K197 is not triggered, it will still periodically "poll" the IEEE board sending an empty frame.
 
 In both cases, the K197 will monitor the first bit sent by the K197 card.
 - if the acknowledge times out, the K197 assumes there is no IEE488 card connected or the card is busy and cannot answer at this time.
