@@ -11,7 +11,7 @@ The K197 is always the initiator.
 
 # Gemini Frame Layer
 
-Description: The framing layer divides the continuous bitstream into frames and sub-frames to facilitate data transmission. Frames may contain optional synchronization sequences to aid in frame detection.
+Description: The framing layer divides the continuous bitstream into frames and sub-frames to facilitate data transmission. Frames may contain optional synchronization sequences to aid in frame boundary detection.
 
 ## Frame Structure
 
