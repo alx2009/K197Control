@@ -9,7 +9,7 @@ When sending a 0 bit, a short pulse is generated on the output pin. The duration
 
 The K197 is always the initiator.
 
-Acknowledge Timeout (t_acknowledge): if no acknowledge is received within a t_acknowledge time the event is reported to the highe layer.
+Acknowledge Timeout (t_acknowledge): if no acknowledge is received within a t_acknowledge time the event is reported to the higher layer.
 
 # Gemini Frame Layer
 
