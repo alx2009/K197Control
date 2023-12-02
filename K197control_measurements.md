@@ -241,7 +241,7 @@ To calculate the measurement value from Bytes B0 to B3, follow these steps:
 
 1. If the overrange flag is set (step 2), the voltmeter is in overrange and you could skip the next steps.
 
-2. Combine the 21 bit Binary Count value from BytesB1, B2 and B3. The Binary Count represents a 21-bit binary number that encodes an unsigned long integer value within the range 0 to 2,097,152. This range corresponds to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point.
+2. Combine the 21 bit Binary Count value from Bytes B1, B2 and B3. The Binary Count represents a 21-bit binary number that encodes an unsigned long integer value within the range 0 to 2,097,152. This range corresponds to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point.
 
 3. Calculate the display value with the formula display_value = binary_count * 400000 / 2097152 (alternatively use display_value = binary_count * 40000000 / 2097152 to extend the resolution to 2 more digits)
 
