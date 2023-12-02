@@ -75,7 +75,7 @@ For generic use (anything other than controlling the K197 voltmeter):
 --------------------------------------------------------------------------------
 # K197 control protocol layer - Sending Measurement Results
 
-The control protocol layer is used by the K197 to send measurement results to the IEEE488 card and receive commands back from IEE488. 
+The control protocol layer is used by the K197 to send measurement results to the IEEE488 card and receive commands back from the card. 
 
 When the K197 has a new measurement, it will be always sent to the IEE488 card. The card will return the latest available measurement when requested to do so via IEE488 bus (e.g. READ)
 
