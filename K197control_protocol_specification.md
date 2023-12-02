@@ -97,7 +97,7 @@ The format of the measurement data is described here: https://github.com/alx2009
 
 ## Sending Commands to the K197
 
-Commands are always sent in a 5 bytes structure, where each byte contains data from bit7 (MSB) to bit0 (LSB). The structure allow buffering different command in the same 5 byte structre before they are sent to the K197. In this way the voltmeter can be completely reconfigured and triggered sending a single frame. 
+Commands are always sent in a 5 bytes structure, where each byte contains data from bit7 (MSB) to bit0 (LSB). The structure allow buffering different command in the same 5 byte structure before they are sent to the K197. In this way the voltmeter can be completely reconfigured and triggered sending a single frame. 
 
 When a command structure is ready to be sent (execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
 
