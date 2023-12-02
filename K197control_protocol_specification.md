@@ -79,7 +79,7 @@ The control protocol layer is used by the K197 to send measurement results to th
 
 When the K197 has a new measurement, it will be sent to the IEE488 card directly (the K197 is the initiator). The card will never intiate a communication on its own. When the K197 initiates a new frame, the card has an opportunity to retuirn any command that may be ready for transmission to the K197.
 
-Note that commands that only affect the IEE488 bus are handled by the IEE488 card directly. Some commands (e.g. REN, GTL) are sent to the K197 as soon as possible but most commands are cached in the IEEE488 card until the "X" (Execute) command is received. Then the entire command sequence is marked as ready for transmisison, and it will be sent to the K197 with the next frame.
+Note that commands that only affect the IEE488 bus are handled by the IEE488 card directly. Some commands (e.g. REN, GTL) are sent to the K197 as soon as possible but most commands are cached in the IEEE488 card until the "X" (Execute) command is received. Then the entire command sequence is marked as ready for transmission, and it will be sent to the K197 with the next frame.
 
 If an Acknowledge Timeout even is reported by the lower layer, the control protocol will assume that the other party is not present or temporarily busy. It will wait at least a frame timout before attempting a new transmission. 
 
@@ -99,7 +99,7 @@ The format of the measurement data is described here: https://github.com/alx2009
 
 Commands are always sent in a 5 bytes structure, where each byte contains data from bit7 (MSB) to bit0 (LSB). The structure allow buffering different command in the same 5 byte structure before they are sent to the K197. In this way the voltmeter can be completely reconfigured and triggered sending a single frame. 
 
-When a command structure is ready to be sent (execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
+When a command structure is ready for transmission (e.g. after an execute command on the IEEE 488 bus), the IEEE 488 card must wait until a new frame is started by the K197. The frame with the command then can be sent. It must be sent without any initial synchronization sequence.
 
 The format of the control data is described here: https://github.com/alx2009/K197Control/blob/main/K197control_commands.md
 
