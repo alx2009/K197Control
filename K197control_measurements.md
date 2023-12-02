@@ -108,9 +108,9 @@ Description: This section explains how Byte B1 of the measurement result is enco
 
 Byte B1 is structured as follows:
 
-| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
+| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Binary Count MSB) |
 |--------------|-------------------|-------------------|-----------------------------|
-| Sign         | Undefined         | Overrange         | Display Count MSB           |
+| Sign         | Undefined         | Overrange         | Binary Count MSB           |
 
 - Bit 7 (Sign) represents the sign of the measurement:
   - 1: Negative
@@ -120,7 +120,7 @@ Byte B1 is structured as follows:
 
 - Bit 5 (Overrange) is the overrange flag, indicating an overrange condition when set to 1.
 
-- Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the display count.
+- Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the binary count.
 
 ## Sign of the Measurement
 
@@ -138,21 +138,21 @@ Bit 5 (Overrange) serves as an overrange flag. It is set to 1 to indicate an ove
 
 ## Display Count MSB
 
-Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the display count.
+Bits 4-0 (Display Count MSB) represent the 5 most significant bits of the binary count.
 
 ## Example
 
 Here's an example of Byte B1 with various parameters set:
 
-| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
-|--------------|-------------------|-------------------|-----------------------------|
-| 1            | 1                 | 0                 | 11010                       |
+| Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (binary Count bits 20-16) |
+|--------------|-------------------|-------------------|-----------------------------------|
+| 1            | 1                 | 0                 | 11010                             |
 
 In this example:
 - The measurement is negative.
 - Bit 6 is undefined and set to 1.
 - There is no overrange condition (Bit 5 is 0).
-- The 5 most significant bits of the display count are 11010.
+- The 5 most significant bits (bits 20-16) of the binary count are 11010.
 
 # Measurement Result Data - B2 and B3 Encoding
 
@@ -164,23 +164,23 @@ Bytes B2 and B3 are structured as follows:
 
 ### Byte B2:
 
-| Bit 7-0 (Display count LSB) |
+| Bit 7-0 (Binary count bits 15-8) |
 |-----------------------------|
-| Display count bits 8-15     |
+| Display count bits 15-8     |
 
-- Bits 7-0 (Display count LSB) represent bit 8-15 of the display count.
+- Bits 7-0 represent bits 8-15 of the binary count.
 
 ### Byte B3:
 
-| Bit 7-0 (Display count LSB) |
+| Bit 7-0 (Binary count bits 7-0) |
 |-----------------------------|
-| Display count LSB           |
+| Binary count bits 7-0           |
 
-- Bits 7-0 (Display count LSB) represent the 8 least significant bits of the display count.
+- Bits 7-0  represent the 8 least significant bits of the display count.
 
 ## Display count LSB
 
-Bytes B2 and B3 together represent the 16 least significant bits of the display count. They contain the least significant bits of the display count value.
+Bytes B2 and B3 together represent the 16 least significant bits of the binary count.
 
 ## Example
 
@@ -188,17 +188,20 @@ Here's an example of Bytes B2 and B3 with display count LSB values:
 
 ### Byte B2:
 
-| Bit 7-0 (Display count LSB) |
+| Bit 7-0 (Display count  bits 15-8) |
 |-----------------------------|
 | 11011010                    |
 
 ### Byte B3:
 
-| Bit 7-0 (Display count LSB) |
+| Bit 7-0 (Display count  bits 7-0) |
 |-----------------------------|
 | 00101101                    |
 
-In this example, B2 and B3 together encode the 16 least significant bits of the display count.
+In this example, B2 and B3 together encode the 16 least significant bits of the display count, equal to:
+- 1101101000101101 in base 2 notation (binary)
+- DA2D in base 16 notation (hexadecimal)
+- 55853 in base 10 notation (decimal)
 
 # Measurement Result Data - B0 to B3 Encoding and Value Calculation
 
@@ -218,51 +221,45 @@ Bytes B0 to B3 are structured as follows:
 
 | Bit 7 (Sign) | Bit 6 (Undefined) | Bit 5 (Overrange) | Bit 4-0 (Display Count MSB) |
 |--------------|-------------------|-------------------|-----------------------------|
-| Sign         | Undefined         | Overrange         | Display Count MSB           |
+| Sign         | Undefined         | Overrange         | Binary Count MSB           |
 
 ### Byte B2:
 
-| Bit 7-0 (Display Count LSB) |
+| Bit 7-0 (Binary Count bits 15-8) |
 |-----------------------------|
-| Display Count LSB           |
+| Binary Count bits 15-8           |
 
 ### Byte B3:
 
-| Bit 7-0 (Display Count LSB) |
+| Bit 7-0 (Binary Count bits 7-0) |
 |-----------------------------|
-| Display Count LSB (big endian)|
+| Binary Count bits 7-0      |
 
 ## Procedure to Obtain Measurement Value
 
 To calculate the measurement value from Bytes B0 to B3, follow these steps:
 
-1. Extract the measurement unit from Byte B0 using bits 7 and 6. The unit is determined as follows:
+1. If the overrange flag is set (step 2), the voltmeter is in overrange and you could skip the next steps.
+
+2. Combine the 21 bit Binary Count value from BytesB1, B2 and B3. The Binary Count represents a 21-bit binary number that encodes an unsigned long integer value within the range 0 to 2,097,152. This range corresponds to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point.
+
+3. Calculate the display value with the formula display_value = binary_count * 400000 / 2097152 (alternatively use display_value = binary_count * 40000000 / 2097152 to extend the resolution to 2 more digits)
+
+4. Extract the measurement unit from Byte B0 using bits 7 and 6. The unit is determined as follows:
    - 00: Volt
    - 10: Ampere
    - 01: Ohm
    - 11: dB
 
-2. Check Bit 5 of Byte B1 (Overrange flag). If it is set (1), an overrange condition is indicated.
+5. Depending on the range (Bit 2-0 in Byte B0) and measurement unit (step 1), scale the display value by dividing or multiplying it by the appropriate power of 10.
 
-3. Extract the sign of the measurement from Bit 7 of Byte B1. If it is set (1), the measurement is negative; otherwise, it is positive.
+6. Extract the sign of the measurement from Bit 7 of Byte B1. If it is set (1), the measurement is negative; otherwise, it is positive.
 
-4. Combine the 16-bit Display Count value from Bytes B2 and B3. These bytes contain the least significant bits of the Display Count.
-
-5. The Display Count represents a 21-bit binary number that encodes an unsigned long integer within the range 0 to 2,097,152 (corresponding to 0 to 400,000 in the voltmeter's display, ignoring sign and decimal point).
-
-6. Apply the measurement unit to the Display Count value based on the unit extracted in step 1. This gives you the raw measurement value.
-
-7. Depending on the range (Bit 2-0 in Byte B0), scale the raw measurement value by dividing or multiplying it by the appropriate power of 10. The exact scaling factor should be determined based on your protocol's specifications.
-
-8. If the overrange flag is set (step 2), handle the overrange condition according to your protocol's specifications.
-
-9. If the sign bit is set (step 3), negate the measurement value obtained in step 7 to account for the negative sign.
-
-10. The result obtained in step 9 represents the final measurement value, scaled to the appropriate unit and range.
+7. IF Bit 3 of B0 is set the measurement is relative
 
 ## Resolution Note
 
-Please note that the Display Count provides slightly better resolution compared to what is displayed by the voltmeter. However, the extra resolution is not significant because it is smaller than the measurement error according to the voltmeter's specifications (more experimentation is needed to understand if there are special cases where the extra resolution could be significant).
+Please note that the Display Count provides slightly better resolution compared to what is displayed by the voltmeter (see also step 3 above). However, the extra resolution is not significant because it is smaller than the measurement error according to the voltmeter's specifications (more experimentation is needed to understand if there are special cases where the extra resolution could be useful).
 
 ## Example
 
