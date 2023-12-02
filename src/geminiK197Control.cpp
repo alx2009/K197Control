@@ -13,7 +13,7 @@
 
   Note: this file implements the class geminiProtocol
 */
-#include "GeminiK197Control.h"
+#include "geminiK197Control.h"
 
 static GeminiK197Control::K197measurement
     defaultMeasurementResult; ///< default meaurement buffer
