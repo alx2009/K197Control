@@ -178,11 +178,11 @@ Description: This section explains how Byte B2 of the command structure is encod
 
 # Command Data - B3 Encoding
 
-Byute B3 is reserved and should always be set to 0
+Byte B3 is reserved and should always be set to 0
 
 # Command Data - B4 Encoding
 
-Byute B4 is reserved and should always be set to 0
+Byte B4 is reserved and should always be set to 0
 
 
 
