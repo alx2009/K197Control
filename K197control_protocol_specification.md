@@ -25,7 +25,7 @@ A frame consists of the following components:
 
 All components are optional, but obviously at least one component must be present for a frame to exist
 
-The party that is starting a frame is also controlling when the frame ends, by not acknowledging the last bit sent by the other party (otherwise the other party would acknowledge the acknowledge and the frame would never end). 
+The party that is starting a frame is also controlling when the frame ends, by not acknowledging the last bit sent by the other party (otherwise the other party would acknowledge the acknowledge and so on without end). 
 
 Timeout (t_frame): if no data is sent within a t_frame time interval (frame timout), the next bit will be considered as the start of a new frame
 
