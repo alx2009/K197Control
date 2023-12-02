@@ -9,6 +9,8 @@ When sending a 0 bit, a short pulse is generated on the output pin. The duration
 
 The K197 is always the initiator.
 
+Acknowledge Timeout (t_acknowledge): if no acknowledge is received within a t_acknowledge time the event is reported to the highe layer.
+
 # Gemini Frame Layer
 
 Description: The framing layer divides the continuous bitstream into frames and sub-frames to facilitate data transmission. Frames may contain optional synchronization sequences to aid in frame boundary detection.
