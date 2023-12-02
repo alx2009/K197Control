@@ -31,6 +31,7 @@ The party that is starting a frame is also controlling when the frame ends, by n
 
 Timeout (t_frame): if no data is sent within a t_frame time interval (frame timout), the next bit will be considered as the start of a new frame
 
+If an Acknowledge Timeout even is reported by the lower layer, the current frame transmission is skipped and the event is reported to the higher layer.
 
 ## Sub-Frame Structure
 
@@ -73,13 +74,23 @@ Here's an example of a frame structure with a synchronization sequence:
 --------------------------------------------------------------------------------
 # K197 control protocol layer - Sending Measurement Results
 
+The control protocol layer is used by the K197 to send measurement results to the IEEE488 card and receive commands back from IEE488. 
+
+When the K197 has a new measurement, it will be always sent to the IEE488 card. The card will return the latest available measurement when requested to do so via IEE488 bus (e.g. READ)
+
+Commands that only affect the IEE488 bus are handled by the IEE488 card directly. Some commands (e.g. REN, GTL) are sent to the K197 as soon as possible but most commands are cached in the IEEE488 card until the "X" (Execute) command is received. Then the entire command sequence is sent to the K197.
+
+If an Acknowledge Timeout even is reported by the lower layer, the control protocol will assume that the other party is not present or temporarily busy. It will wait at least a frame timout before attempting a new transmission. 
+
+# K197 control protocol layer - Sending Measurement Results
+
 Description: This section outlines how measurement results and commands are encoded and transmitted. 
 
 ## Retrieving measurement results from the K197
 
 Each measurement consists of 4 bytes, where each byte contains data from bit7 (MSB) to bit0 (LSB). When a new measurement rsult is available, the K197 will attempt to send it to the IEEE 488 bord using the gemini framing layer.
 
-When the K197 is measuring continuosly, it will send about 3 measurements every second. When the K197 is waiting for a trigger, an empty frame is sent instead (this is done so the IEEE 488 card can trigger the measurement and/or sned any other command to the K197). This emtpty frame is sent more frequently than 3 times a second, in this way the IEEE 488 can can trigger a measurement more quickly (see next session).
+When the K197 is measuring continuosly, it will send about 3 measurements every second. When the K197 is waiting for a trigger, an empty frame is sent instead (this is done so the IEEE 488 card can trigger the measurement and/or send any other command to the K197). This emtpty frame is sent more frequently than 3 times a second, in this way the IEEE 488 can can trigger a measurement more quickly (see next session).
 
 The format of the measurement data is described here: https://github.com/alx2009/K197Control/blob/main/K197control_measurements.md
 
