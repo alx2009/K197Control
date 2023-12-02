@@ -75,8 +75,8 @@ The gemini frame protocol packs and unpacks sequence of bytes in frames. A frame
 
 In principle there are a number of ways to detect a frame boundary:
 - detect an initial synchronization sequence with 9 or more consecutive zeroes (this seems to be the case for the K197 but I have not used this method in the library).  
-- rely on a frame timeout period. Once the communication is idle for more than the frame timeout period, the next bit will start a new frame (this is the method implemented in the library).
-- use frames of known lenght. Once all the bytes of a frame have been received we know that the frame reception is complete (this is also supported by the library so that we can process a frame as soon as possible)
+- rely on a frame timeout period. Once the communication is idle for more than the frame timeout period, the next bit will start a new frame (this is the method implemented in the library to detect the frame start).
+- use frames of known lenght. Once all the bytes of a frame have been received we know that the frame reception is complete (this is also supported by the library to detect the frame end, so that we can process it as soon as possible)
 
 When sending a frame, if an acknowledgment timeout is detected by the lower layer the frame layer will assume that the peer is unavailable and skip the rest of the frame. If an incomplete frame has been received the entire frame must be ingnored. 
 
