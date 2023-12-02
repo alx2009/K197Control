@@ -39,7 +39,7 @@ Using the IEEE interface instead of the display interface offers more possibilit
 
 The protocol used by the K197 to communicate with the IEEE board uses two wires, one for each direction. As far as I know it is a unique protocol (at least, I never encountered it before). If you know of other applications/instruments using a similar protocol please comment in one of the forum threads linked above.
 
-The K197 voltmeter was designed at the time where hardware support for serial communication was rarely integrated in generic I/O peripherals. Rather than using a dedicated IC (e.g. a UART), the designers implemented a full duplex protocol which can be efficiently bit banged and is very tolerant of any delay from either side. In addition to the input and output I/O pins, the only other HW resource required is an edge sensitive interrupt. 
+The K197 voltmeter was designed at the time where hardware support for serial communication was rarely integrated in generic I/O peripherals. Rather than using a dedicated IC (e.g. a UART), the designers implemented an ad-hoc, full duplex protocol using the few HW resources available. In addition to the input and output pins, the only other HW resource required is an edge sensitive interrupt.
 
 To understand the protocol, it is useful to think of three layers (this is somewhat arbitrary but bear with me for now), which I dubbed gemini, gemini frame and K197 control respectively:
 - The gemini protocol is the lowest layer and is responsible to send a stream of bits between two peers. For every bit transmitted in one direction there is a bit transmitted in the opposite direction.
