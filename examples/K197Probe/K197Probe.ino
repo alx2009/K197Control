@@ -32,14 +32,11 @@
 // Predefined command sequences
 ////////////////////////////////////////////////////////////////////////////////////
 uint8_t cmd_0[] = {0x00, 0x00, 0x00, 0x00, 0x00}; ///< empty command
-uint8_t cmd_1[] = {0x00, 0x02, 0x80, 0x00, 0x00}; ///< B0 command
-uint8_t cmd_2[] = {0x00, 0x00, 0xa0, 0x00, 0x00}; ///< B1 command
-uint8_t cmd_3[] = {0x00, 0x00, 0x80, 0x00,
-                   0x00}; ///< unknown command to try no. 1
-uint8_t cmd_4[] = {0x00, 0x40, 0x00, 0x00,
-                   0x00}; ///< unknown command to try no. 2
-uint8_t cmd_5[] = {0x00, 0x50, 0x00, 0x00,
-                   0x00}; ///< unknown command to try no. 3
+uint8_t cmd_1[] = {0xC0, 0x00, 0x00, 0x00, 0x00}; ///< Decibel
+uint8_t cmd_2[] = {0x20, 0x00, 0x00, 0x00, 0x00}; ///< absolute
+uint8_t cmd_3[] = {0x30, 0x00, 0x00, 0x00, 0x00}; ///< relative
+uint8_t cmd_4[] = {0x00, 0xA0, 0x00, 0x00, 0x00}; ///< remote
+uint8_t cmd_5[] = {0x00, 0x80, 0x00, 0x00, 0x00}; ///< local
 uint8_t *cmd[] = {cmd_0, cmd_1, cmd_2, cmd_3, cmd_4, cmd_5}; ///< consolidate all pre-defined commands in one array of pointers
 
 // the next instruction is a fancy way to set cmd_size = 5
@@ -164,7 +161,7 @@ void setup() {
   Serial.begin(115200); // Need a high baud rate or blocks for too long when
                         // printing to Serial
   delay(1000);
-  Serial.println(F("K197DataAcquisition"));
+  Serial.println(F("K197Probe"));
   if (!gemini.begin()) {
     Serial.println(F("begin failed!"));
     while (true)
