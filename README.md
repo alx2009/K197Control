@@ -36,7 +36,7 @@ The following picture shows the test setup with the pin configuration in the exa
 
 The first terminal of the IEEE connector is the one that is closest to the power transformer (see picture above).
 
-Important: As shown in the pictire, the IEEE card must be removed in order to test this library. Failure to do so may result in damage to the voltmeter and/or the IEEE card and/or the Arduino Uno. 
+Important: As shown in the picture, the IEEE card must be removed in order to test this library. Failure to do so may result in damage to the voltmeter and/or the IEEE card and/or the Arduino Uno. 
 
 ## Known Limitations
 
