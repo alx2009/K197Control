@@ -31,8 +31,8 @@ The following picture shows the test setup with the pin configuration in the exa
 ![K197control_uno_composite](https://github.com/alx2009/K197Control/assets/100997527/5ead693a-ab44-4873-83b2-d300976670d0)
 
 - Connect the second terminal in the IEEE connector of the K197 with the Arduino Uno GND pin (black wire in the above picture)
-- Connect the third terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 3 (orange wire in the above picture). In the examples pin 3 is deined as OUTPUT_PIN.
-- Connect the fourth terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 2 (blue wire in the above picture). In the examples pin 2 is deined as INPUT_PIN.
+- Connect the third terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 3 (orange wire in the above picture). In the examples pin 3 is defined as OUTPUT_PIN.
+- Connect the fourth terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 2 (blue wire in the above picture). In the examples pin 2 is defined as INPUT_PIN.
 
 The first terminal of the IEEE connector is the one that is closest to the power transformer (see picture above).
 
