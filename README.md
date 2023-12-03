@@ -8,8 +8,6 @@ At the moment the library only supports Arduino Uno and other boards with a comp
 
 ## DISCLAIMER: Please note that the purpose of this repository is educational. Any use of the information for any other purpose is under own responsibility.
 
-![K197control_uno_composite](https://github.com/alx2009/K197Control/assets/100997527/5ead693a-ab44-4873-83b2-d300976670d0)
-
 # Installation and use
 
 Please note the disclaimer above. These instructions explain how to download the library and compile under the Arduino IDE. Any other use is your own responsibility.
@@ -23,6 +21,18 @@ Once the library is installed, the example programs can be found in the Arduino 
 - The K197DataAcquisition example is similar to K197ControlDataLogger but in addition it can send command to the voltmeter, including setting trigger mode and overriding the range.
 
 In case you want to understand how the K197 comunicates with the programs (e.g. to modify the library or create your own), the protocol specification can be found here: https://github.com/alx2009/K197Control/blob/main/K197control_protocol_specification.md 
+
+## Test setup
+
+The following picture shows the test setup with the pin configuration in the examples.
+
+![K197control_uno_composite](https://github.com/alx2009/K197Control/assets/100997527/5ead693a-ab44-4873-83b2-d300976670d0)
+
+- Connect the second terminal in the IEEE connector of the K197 with the Arduino Uno GND pin (black wire in the above picture)
+- Connect the third terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 3 (orange wire in the above picture). In the examples pin 3 is deined as OUTPUT_PIN.
+- Connect the fourth terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 2 (blue wire in the above picture). In the examples pin 2 is deined as INPUT_PIN.
+
+Note: the first terminal of the IEE connector is the one that is closest to the power transformer (see picture above).
 
 ## Known Limitations
 
