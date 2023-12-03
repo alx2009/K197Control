@@ -8,6 +8,8 @@ At the moment the library only supports Arduino Uno and other boards with a comp
 
 ## DISCLAIMER: Please note that the purpose of this repository is educational. Any use of the information for any other purpose is under own responsibility.
 
+![K197control_uno_composite](https://github.com/alx2009/K197Control/assets/100997527/5ead693a-ab44-4873-83b2-d300976670d0)
+
 # Installation and use
 
 Please note the disclaimer above. These instructions explain how to download the library and compile under the Arduino IDE. Any other use is your own responsibility.
