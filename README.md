@@ -24,7 +24,9 @@ In case you want to understand how the K197 comunicates with the programs (e.g. 
 
 ## Test setup
 
-The following picture shows the test setup with the pin configuration in the examples.
+Please note the disclaimer above. This section documents how the examples have been tested. Any other use is your own responsibility.
+
+The following picture shows the test setup with the pin configuration in the examples. If you change the pin definitions in the example you will need to connect accordingly. Note however that on Arduino Uno only pin 2 or 3 can be defined as INPUT_PIN.
 
 ![K197control_uno_composite](https://github.com/alx2009/K197Control/assets/100997527/5ead693a-ab44-4873-83b2-d300976670d0)
 
@@ -32,7 +34,9 @@ The following picture shows the test setup with the pin configuration in the exa
 - Connect the third terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 3 (orange wire in the above picture). In the examples pin 3 is deined as OUTPUT_PIN.
 - Connect the fourth terminal in the IEEE connector of the K197 with the Arduino Uno I/O pin no. 2 (blue wire in the above picture). In the examples pin 2 is deined as INPUT_PIN.
 
-Note: the first terminal of the IEE connector is the one that is closest to the power transformer (see picture above).
+The first terminal of the IEEE connector is the one that is closest to the power transformer (see picture above).
+
+Important: As shown in the pictire, the IEEE card must be removed in order to test this library. Failure to do so may result in damage to the voltmeter and/or the IEEE card and/or the Arduino Uno. 
 
 ## Known Limitations
 
