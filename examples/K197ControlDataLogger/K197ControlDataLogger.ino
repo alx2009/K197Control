@@ -93,24 +93,21 @@ void loop() {
     // Serial.print(F(": unit=")); Serial.print(pmeasurement->byte0.unit);
     // Serial.print(F(": AC/DC=")); Serial.print(pmeasurement->byte0.ac_dc);
     // Serial.print(F(", undef0=")); Serial.print(pmeasurement->byte0.undefined);
-    // Serial.print(pmeasurement->byte0.undefined); Serial.print(F(", rel="));
-    // Serial.print(pmeasurement->byte0.relative); Serial.print(F(", range="));
-    // Serial.print(pmeasurement->byte0.range); Serial.print(F(", OV="));
-    // Serial.print(pmeasurement->byte1.ovrange); Serial.print(F(", undef1="));
-    // Serial.print(pmeasurement->byte1.undefined); Serial.print(F(", neg="));
-    // Serial.print(pmeasurement->byte1.negative); */ Serial.print(F(" -
-    // getCount()=")); Serial.println(pmeasurement->getCount());
-    // Serial.print(F("getAbsValue()="));
-    // Serial.print(pmeasurement->getAbsValue()); Serial.print(F(",
-    // getValue()=")); Serial.print(pmeasurement->getValue()); Serial.print(F(",
-    // getValueAsDouble()=")); Serial.print(pmeasurement->getValueAsDouble(),
-    // 9);
+    // Serial.print(F(", rel=")); Serial.print(pmeasurement->byte0.relative); 
+    // Serial.print(F(", range=")); Serial.print(pmeasurement->byte0.range); 
+    // Serial.print(F(", OV=")); Serial.print(pmeasurement->byte1.ovrange); 
+    // Serial.print(F(", undef1=")); Serial.print(pmeasurement->byte1.undefined); 
+    // Serial.print(F(", neg=")); Serial.print(pmeasurement->byte1.negative); 
+    // Serial.print(F(" - getCount()=")); Serial.println(pmeasurement->getCount());
+    // Serial.print(F("getAbsValue()=")); Serial.print(pmeasurement->getAbsValue());
+    // Serial.print(F(", getValue()=")); Serial.print(pmeasurement->getValue()); 
+    // Serial.print(F(", getValueAsDouble()=")); Serial.print(pmeasurement->getValueAsDouble(), 9);
 
     char buffer[GeminiK197Control::K197measurement::resultAsStringMinSize];
     Serial.println(pmeasurement->getResultAsString(buffer));
 
     // For enhanced resolution replace the above statements with the following:
-    //char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeER];
+    // char buffer[GeminiK197Control::K197measurement::resultAsStringMinSizeER];
     // Serial.println(pmeasurement->getResultAsStringER(buffer));
   }
 
